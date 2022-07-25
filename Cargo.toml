@@ -2,7 +2,39 @@
 name = "crappy-user"
 version = "0.1.0"
 edition = "2021"
+authors = ["Cesc JR <francesc.travesa@gmail.com>"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+path = "src/main.rs"
+name = "crappy-user"
 
 [dependencies]
+actix-web = "4.0.0"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+serde = { version = "1", features = ["derive"]}
+uuid = { version = "0.8.1", features = ["v4", "serde"] }
+log = "0.4"
+secrecy = { version = "0.8", features = ["serde"] }
+config = "0.13.1"
+tracing = { version = "0.1", features = ["log"] }
+tracing-actix-web = "0.5"
+tracing-subscriber = { version = "0.3", features = ["registry", "env-filter"] }
+tracing-bunyan-formatter = "0.3"
+tracing-log = "0.1"
+
+[dependencies.sqlx]
+version = "0.5.7"
+default-features = false
+features = [
+    "runtime-actix-rustls",
+    "macros",
+    "postgres",
+    "uuid",
+    "chrono",
+    "migrate",
+    "offline"
+]
