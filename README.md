@@ -1,25 +1,26 @@
-# Crappy User microservice
+# RUST BASIC MICRO
 
-Micro for user authentication.
+Base micro to start working;
 
-This is an independent micro from the crappy, that will be done directly
-with ES + CQRS, following a little bit the schema from "Practical microservices".
+* Rust
+* Actix
+* Telemetry from zero 2 production packages
+* UUID even though its not used.
+* PGSQL with pg package
+* Makefile and docker compose with postgre file
+* configuration via env variables (.env.local example present)
 
-This will be an app that will register used registered events and save them
-in the message store, then some aggregator, that I haven't decided yet where it will
-be, probably in this very micro, will create the read model.
+## Usage
 
-The aggregator on the book are done via polling, I might avoid that by just
-doing a synchronous call, but it should be independent enough that if I change 
-my mind, I can change it easily.
+Start the micro via Makefile:
+`make local-start`
 
-# Big picture
+You can access the health_check endpoint: 127.0.0.1:8001/health_check
 
-This whole micro might be replaced fully by a GOlang micro, just to show off.
-deployed in production by a kubernetes ecosystem in aws.
+Change the .env.local variables as wanted, if you change the prefix
+make sure you also change it in the configuration.rs file.
 
-## Decision that should be easy to change in the future:
+## Extend
 
-- The message store DB
-- The aggregator
+missing the cicd bits
 
