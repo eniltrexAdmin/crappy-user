@@ -5,12 +5,12 @@ use crate::domain::UserDomainError;
 #[derive(Debug, PartialEq, Clone)]
 pub struct UserEmail(EmailAddress);
 impl UserEmail {
-    fn new(value: &str) -> Result<Self, UserDomainError> {
+    pub fn new(value: &str) -> Result<Self, UserDomainError> {
             EmailAddress::from_str(value)
             .map(|email_address|{UserEmail{ 0: email_address}})
             .map_err(|error|{UserDomainError::InvalidUserEmail(error.to_string())})
     }
-    fn value(&self) -> String {
+    pub fn value(&self) -> String {
         self.0.clone().to_string()
     }
 }

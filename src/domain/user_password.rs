@@ -33,8 +33,6 @@ impl UserPassword{
             salt
         }
     }
-
-
 }
 
 #[cfg(test)]

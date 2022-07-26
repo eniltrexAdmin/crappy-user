@@ -5,17 +5,17 @@ use crate::domain::UserDomainError;
 pub struct UserId(Uuid);
 
 impl UserId {
-    fn from_string(value: &str) ->  Result<Self, UserDomainError> {
+    pub fn from_string(value: &str) ->  Result<Self, UserDomainError> {
         let uuid = match Uuid::parse_str(value) {
             Err(_) => return Err(UserDomainError::InvalidUuidUserId),
             Ok(uuid) => uuid
         };
         Ok(Self(uuid))
     }
-    fn new(value: Uuid) -> Self {
+    pub fn new(value: Uuid) -> Self {
         Self(value)
     }
-    fn value(&self) -> &Uuid {
+    pub fn value(&self) -> &Uuid {
         &self.0
     }
 }
