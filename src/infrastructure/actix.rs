@@ -113,7 +113,7 @@ impl CrappyUserApp {
                 .wrap(TracingLogger::default())
                 .route("/health_check", web::get().to(controllers::health_check))
                 // .route("/register", web::post().to(controllers::post_match_request))
-                // .route("/login", web::get().to(controllers::get_match_requests))
+                // .route("/authenticate", web::get().to(controllers::get_match_requests))
                 .app_data(db_pool.clone())
         })
             .listen(listener)?

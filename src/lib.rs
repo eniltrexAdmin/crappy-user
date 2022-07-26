@@ -4,6 +4,6 @@ pub mod actix;
 pub mod configuration;
 #[path = "infrastructure/telemetry/telemetry.rs"]
 pub mod telemetry;
-// pub mod domain;
-// pub mod application;
+pub mod domain;
+pub mod application;
 // #[path = "infrastructure/persistence/mod.rs"] pub mod persistence;

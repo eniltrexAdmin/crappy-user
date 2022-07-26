@@ -23,3 +23,14 @@ deployed in production by a kubernetes ecosystem in aws.
 - The message store DB
 - The aggregator
 
+## CQRS and ES
+I am using this package to implement CQRS and ES: https://doc.rust-cqrs.org/
+What I am mainly interested in is in saving the messages in the message store, I don't
+want to do that by myself, but on the other hand, I don't want to overly attack myself
+to this package in case there are limitations.
+
+So far, I am using this even in my domain, which I dont like so:
+TODO: try to move th epackage to the infra part and in my domain
+have all the domain events to implement my own domain trait, then try to move
+out of the domain teh cqrs_es package... because I am not respecting hex architecture now.
+

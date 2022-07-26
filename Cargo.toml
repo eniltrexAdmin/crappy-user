@@ -25,6 +25,12 @@ tracing-actix-web = "0.5"
 tracing-subscriber = { version = "0.3", features = ["registry", "env-filter"] }
 tracing-bunyan-formatter = "0.3"
 tracing-log = "0.1"
+email_address = "0.2.1"
+password-hash = "0.4.2"
+rand = "0.8.5"
+argon2 = "0.4.1"
+cqrs-es = "0.4.2"
+async-trait = "0.1.52"
 
 [dependencies.sqlx]
 version = "0.5.7"
@@ -38,3 +44,6 @@ features = [
     "migrate",
     "offline"
 ]
+
+[dev-dependencies]
+claim = "0.5"
