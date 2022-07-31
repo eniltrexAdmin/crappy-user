@@ -1,7 +1,9 @@
 use uuid::Uuid;
 use crate::domain::UserDomainError;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+// Serialize and deserialize because User has it.
+#[derive(Debug, PartialEq, Copy, Clone, Serialize, Deserialize)]
 pub struct UserId(Uuid);
 
 impl UserId {

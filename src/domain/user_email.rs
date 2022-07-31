@@ -1,8 +1,9 @@
 use std::str::FromStr;
 use email_address::EmailAddress;
 use crate::domain::UserDomainError;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct UserEmail(EmailAddress);
 impl UserEmail {
     pub fn new(value: &str) -> Result<Self, UserDomainError> {

@@ -4,10 +4,10 @@ use std::net::TcpListener;
 use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
 use tracing_actix_web::TracingLogger;
-use sqlx::{Connection, ConnectOptions, PgConnection, PgPool, Executor};
-use sqlx::postgres;
 use tracing::log;
 use secrecy::ExposeSecret;
+use sqlx::{Connection, ConnectOptions, Executor, PgConnection, PgPool, postgres};
+use sqlx::postgres::PgPoolOptions;
 use crate::configuration::Settings;
 
 pub struct CrappyUserApp {
@@ -89,7 +89,7 @@ impl CrappyUserApp {
     }
 
     pub async fn build_actix_server(&self) -> Result<ApplicationReady, std::io::Error> {
-        let connection_pool = postgres::PgPoolOptions::new()
+        let connection_pool = PgPoolOptions::new()
             .connect_timeout(std::time::Duration::from_secs(2))
             .connect_with(self.pg_connect_options_with_db())
             .await

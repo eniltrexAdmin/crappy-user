@@ -1,14 +1,13 @@
-use std::borrow::Borrow;
-use password_hash::{Output, PasswordHash, Salt, SaltString};
+use password_hash::{PasswordHash, SaltString};
 use argon2::Argon2;
-use rand::{thread_rng, Rng};
-use rand::distributions::Alphanumeric;
+use rand::thread_rng;
 use crate::domain::UserDomainError;
+use serde::{Deserialize, Serialize};
 
-
+#[derive(Serialize, Deserialize)]
 pub struct UserPassword{
     pub hash_string: String,
-    pub salt: SaltString
+    pub salt: String
 }
 impl UserPassword{
     pub fn new(value: &str)-> Result<Self, UserDomainError> {
@@ -23,11 +22,11 @@ impl UserPassword{
 
         Ok( UserPassword{
             hash_string: hash.to_string(),
-            salt: salt_value
+            salt: salt_value.to_string()
         })
     }
 
-    pub fn from_storage(hash_string: String, salt: SaltString) -> Self {
+    pub fn from_storage(hash_string: String, salt: String) -> Self {
         UserPassword {
             hash_string,
             salt
@@ -54,7 +53,7 @@ mod tests {
         let user_password = UserPassword::new(password).unwrap();
         let salt = user_password.salt.clone();
         let password_hash = user_password.hash_string.clone();
-        let retrieved_user_password = UserPassword::from_storage(password_hash, salt);
+        let retrieved_user_password = UserPassword::from_storage(password_hash, salt.to_string());
 
         assert_eq!(retrieved_user_password.hash_string, user_password.hash_string);
     }
@@ -71,6 +70,20 @@ mod tests {
 
         let alg:&[&dyn PasswordVerifier] = &[&Argon2::default()];
         assert_ok!(password_hash.verify_password(alg, password_attempt));
+    }
+
+    #[test]
+    fn invalid_password() {
+        let password = "secret_password";
+        let user_password = UserPassword::new(password).unwrap();
+
+        let password_attempt = "bad_password";
+        let salt = user_password.salt.clone();
+
+        let password_hash = PasswordHash::new(&user_password.hash_string).unwrap();
+
+        let alg:&[&dyn PasswordVerifier] = &[&Argon2::default()];
+        assert_err!(password_hash.verify_password(alg, password_attempt));
     }
 }
 
