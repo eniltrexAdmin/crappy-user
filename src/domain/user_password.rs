@@ -64,8 +64,6 @@ mod tests {
         let user_password = UserPassword::new(password).unwrap();
 
         let password_attempt = "secret_password";
-        let salt = user_password.salt.clone();
-
         let password_hash = PasswordHash::new(&user_password.hash_string).unwrap();
 
         let alg:&[&dyn PasswordVerifier] = &[&Argon2::default()];
@@ -78,8 +76,6 @@ mod tests {
         let user_password = UserPassword::new(password).unwrap();
 
         let password_attempt = "bad_password";
-        let salt = user_password.salt.clone();
-
         let password_hash = PasswordHash::new(&user_password.hash_string).unwrap();
 
         let alg:&[&dyn PasswordVerifier] = &[&Argon2::default()];

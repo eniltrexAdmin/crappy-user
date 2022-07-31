@@ -38,7 +38,7 @@ impl User {
     pub fn apply_user_registered_event(&mut self, user_registered_event: UserRegisteredDomainEvent) {
         self.is_registered = true;
         self.email = Some(UserEmail::new(user_registered_event.email.as_str()).unwrap_or_else(|result| {
-            panic!("User Email was saved wrong. Panicking. Applying events should never go wrong.")
+            panic!("{}", result)
         }));
         // TODO what about password? it should have been created on the "command"
         self.password = Some(UserPassword::from_storage(
@@ -65,7 +65,8 @@ impl Aggregate for User {
         "user".to_string()
     }
 
-    async fn handle(&self, command: Self::Command, service: &Self::Services) -> Result<Vec<Self::Event>, Self::Error> {
+    // honestly, it makes not sense that the handle is inside the aggregate....
+    async fn handle(&self, command: Self::Command, _service: &Self::Services) -> Result<Vec<Self::Event>, Self::Error> {
        match command{
            UserCommand::RegisterUser(register_user_command) => {
                // I need to validate here the stuff before publishing the domain event.
@@ -95,6 +96,7 @@ impl Aggregate for User {
 
 #[cfg(test)]
 mod tests {
+    use claim::assert_ok;
     use uuid::Uuid;
     use super::*;
     use cqrs_es::test::TestFramework;
@@ -109,28 +111,47 @@ mod tests {
         assert_eq!(None, user.email());
     }
 
-    #[test]
-    fn test_register_user() {
+    #[tokio::test]
+    async fn test_register_user() {
         let id = Uuid::new_v4();
         let email = "francesc.travesa@mymail.com".to_string();
-        let expected = UserEvent::RegisteredUser(UserRegisteredDomainEvent{
-            id: id.clone(),
-            email: email.clone(),
-            password_hash: "".to_string(),
-            salt: "".to_string()
-        });
+        // let expected = UserEvent::RegisteredUser(UserRegisteredDomainEvent{
+        //     id: id.clone(),
+        //     email: email.clone(),
+        //     password_hash: "".to_string(),
+        //     salt: "".to_string()
+        // });
 
         let command = UserCommand::RegisterUser(RegisterUserCommand::new(
             id,
-            email,
+            email.clone(),
              "mySecretPassword".to_string()
         ));
 
-        UserTestFramework::with(())
-            .given_no_previous_events()
-            .when(command)
-            .then_expect_events(vec![expected])
+        // I can't do it via this, I need to test partially, not even with "mcokign service
+        // UserTestFramework::with(())
+        //     .given_no_previous_events()
+        //     .when(command)
+        //     .then_expect_events(vec![expected])
+
+        let user = User::default();
+        let result = user.handle(command,&()).await;
+        // assert_ok!(result);
+        let events = result.unwrap();
+        assert_eq!(1, events.len());
+        let event = events.get(0).unwrap();
+
+        match event {
+            UserEvent::RegisteredUser(user_registered_event) => {
+                assert_eq!(user_registered_event.id, id);
+                assert_eq!(user_registered_event.email, email);
+                assert_eq!(user_registered_event.password_hash.is_empty(), false);
+                assert_eq!(user_registered_event.salt.is_empty(), false);
+            }
+        }
     }
+
+
 }
 
 
