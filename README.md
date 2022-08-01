@@ -29,8 +29,22 @@ What I am mainly interested in is in saving the messages in the message store, I
 want to do that by myself, but on the other hand, I don't want to overly attack myself
 to this package in case there are limitations.
 
-So far, I am using this even in my domain, which I dont like so:
-TODO: try to move th epackage to the infra part and in my domain
-have all the domain events to implement my own domain trait, then try to move
-out of the domain teh cqrs_es package... because I am not respecting hex architecture now.
+Advantages:
+test framework out of the box
+applies the events without having to write yourself this logic
+(or the test would not have pass!)
 
+Disadvantages:
+missing application layer. I might need to query the view data for example
+to see that the user is not already registered.
+(like a "get" also, the same function) and this can't be done in the aggregate
+(this might force me to not to use this package anymore).
+
+Errors might become also domain events to be saved, but well, I can still
+do it this way while keeping using this package
+
+
+
+## Commands:
+
+sqlx migrate --source src/infrastructure/persistence/postgres/migrations add create_users_view

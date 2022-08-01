@@ -40,7 +40,7 @@ impl User {
         self.email = Some(UserEmail::new(user_registered_event.email.as_str()).unwrap_or_else(|result| {
             panic!("{}", result)
         }));
-        // TODO what about password? it should have been created on the "command"
+
         self.password = Some(UserPassword::from_storage(
             user_registered_event.password_hash,
              user_registered_event.salt
@@ -65,10 +65,22 @@ impl Aggregate for User {
         "user".to_string()
     }
 
-    // honestly, it makes not sense that the handle is inside the aggregate....
+    // I am still unsure whether I like this. So the function should be in the aggregate
+    // teh aggregate would save the events in its own thingy, in rust maybe more functional
+    // events are being returned. But all of this, I might like it to have it still
+    // in the aggregate, and the handler and command on application. Handler gets the events
+    // by checking the aggregate function "this->events()".
+
+    // also the treatment of error... I might want to trigger an already registered event instead
+    // of returning an error.
+
+    // also what about checking the email already exists? I need to query the view first.
     async fn handle(&self, command: Self::Command, _service: &Self::Services) -> Result<Vec<Self::Event>, Self::Error> {
        match command{
            UserCommand::RegisterUser(register_user_command) => {
+               if self.is_registered {
+                   return Err(UserDomainError::UserAlreadyRegistered(self.email.as_ref().unwrap().value()));
+               }
                // I need to validate here the stuff before publishing the domain event.
                let user_email = UserEmail::new(register_user_command.email.as_str())?;
                let user_password = UserPassword::new(register_user_command.password.as_str())?;
@@ -115,12 +127,6 @@ mod tests {
     async fn test_register_user() {
         let id = Uuid::new_v4();
         let email = "francesc.travesa@mymail.com".to_string();
-        // let expected = UserEvent::RegisteredUser(UserRegisteredDomainEvent{
-        //     id: id.clone(),
-        //     email: email.clone(),
-        //     password_hash: "".to_string(),
-        //     salt: "".to_string()
-        // });
 
         let command = UserCommand::RegisterUser(RegisterUserCommand::new(
             id,
@@ -128,15 +134,8 @@ mod tests {
              "mySecretPassword".to_string()
         ));
 
-        // I can't do it via this, I need to test partially, not even with "mcokign service
-        // UserTestFramework::with(())
-        //     .given_no_previous_events()
-        //     .when(command)
-        //     .then_expect_events(vec![expected])
-
         let user = User::default();
         let result = user.handle(command,&()).await;
-        // assert_ok!(result);
         let events = result.unwrap();
         assert_eq!(1, events.len());
         let event = events.get(0).unwrap();
@@ -151,6 +150,26 @@ mod tests {
         }
     }
 
+    #[test]
+    fn test_register_user_idempotency() {
+        let id = Uuid::new_v4();
+        let email = "francesc.travesa@mymail.com".to_string();
+        let previous = UserEvent::RegisteredUser(UserRegisteredDomainEvent{
+            id: id.clone(),
+            email:  email.clone(),
+            password_hash: "".to_string(),
+            salt: "".to_string()
+        });
+        let command = UserCommand::RegisterUser(RegisterUserCommand::new(
+            id,
+            email.clone(),
+            "mySecretPassword".to_string()
+        ));
+        UserTestFramework::with(())
+            .given(vec![previous])
+            .when(command)
+            .then_expect_error(UserDomainError::UserAlreadyRegistered("francesc.travesa@mymail.com".to_string()))
+    }
 
 }
 

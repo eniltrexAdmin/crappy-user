@@ -7,6 +7,7 @@ pub enum UserDomainError {
     InvalidUserEmail(String),
     CouldNotGeneratePassword(String),
     ProblemRetrievingPassword(String),
+    UserAlreadyRegistered(String),
     CommandNotYetImplemented(String)
 }
 impl std::error::Error for UserDomainError {}
@@ -17,7 +18,8 @@ impl Display for UserDomainError {
             UserDomainError::InvalidUserEmail(error) => write!(f,"InvalidUserEmail: {}", error),
             UserDomainError::CouldNotGeneratePassword(error) => write!(f,"Could Not Generate Password: {}", error),
             UserDomainError::ProblemRetrievingPassword(error) => write!(f,"Could not retrieve password: {}", error),
-            UserDomainError::CommandNotYetImplemented(command) => write!(f, "Command {} is not implemented yet.", command)
+            UserDomainError::CommandNotYetImplemented(command) => write!(f, "Command {} is not implemented yet.", command),
+            UserDomainError::UserAlreadyRegistered(error) => write!(f, "User {} is already registered.", error)
         }
     }
 }
