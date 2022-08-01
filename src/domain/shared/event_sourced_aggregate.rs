@@ -1,4 +1,5 @@
 use crate::domain::DomainEvent;
+use async_trait::async_trait;
 
 // Default is needed for a "default" empty state. This is also in the book
 // to have an "init" state.
@@ -6,6 +7,7 @@ use crate::domain::DomainEvent;
 pub trait EventSourcedAggregate: Default + Sync + Send {
     type Event: DomainEvent;
     type Error: std::error::Error;
+    fn aggregate_type() -> String;
     fn apply(&mut self, event: Self::Event);
     // not handle.
 }

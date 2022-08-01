@@ -76,7 +76,7 @@ impl CrappyUserApp {
         let connection_pool = PgPool::connect_with(self.pg_connect_options_with_db())
             .await
             .expect("Failed to connect to Postgres");
-        sqlx::migrate!("./src/infrastructure/persistence/postgres/postgres_migrations")
+        sqlx::migrate!("./src/infrastructure/persistence/postgres/migrations")
             .run(&connection_pool)
             .await
             .expect("Failed to migrate the database");

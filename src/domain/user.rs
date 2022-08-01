@@ -1,4 +1,3 @@
-use cqrs_es::Aggregate;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use crate::domain::*;
@@ -36,7 +35,7 @@ impl User {
     }
 
     // all domain actions should assume an "init" state. Therefore all have &self.
-    pub fn register_user(&self, id:Uuid, email:&str, password: &str) -> Result<Vec<UserEvent>, Self::Error> {
+    pub fn register_user(&self, id:Uuid, email:&str, password: &str) -> Result<Vec<UserEvent>, UserDomainError> {
         if self.is_registered {
             return Err(UserDomainError::UserAlreadyRegistered(self.email.as_ref().unwrap().value()));
         }
@@ -75,37 +74,12 @@ impl Default for User {
 }
 
 #[async_trait]
-impl Aggregate for User {
-    type Command = UserCommand;
+impl EventSourcedAggregate for User {
     type Event = UserEvent;
     type Error = UserDomainError;
-    type Services = ();
 
     fn aggregate_type() -> String {
         "user".to_string()
-    }
-
-    // also what about checking the email already exists? I need to query the view first.
-    async fn handle(&self, command: Self::Command, _service: &Self::Services) -> Result<Vec<Self::Event>, Self::Error> {
-       match command{
-           UserCommand::RegisterUser(register_user_command) => {
-               if self.is_registered {
-                   return Err(UserDomainError::UserAlreadyRegistered(self.email.as_ref().unwrap().value()));
-               }
-               // I need to validate here the stuff before publishing the domain event.
-               let user_email = UserEmail::new(register_user_command.email.as_str())?;
-               let user_password = UserPassword::new(register_user_command.password.as_str())?;
-
-               let user_registered_event = UserRegisteredDomainEvent{
-                   id: register_user_command.id,
-                   email: user_email.value(),
-                   password_hash: user_password.hash_string,
-                   salt: user_password.salt
-               };
-               Ok(vec![UserEvent::RegisteredUser(user_registered_event)])
-           },
-           not_implemented_command => Err(UserDomainError::CommandNotYetImplemented(not_implemented_command.into()))
-       }
     }
 
     fn apply(&mut self, event: Self::Event) {
