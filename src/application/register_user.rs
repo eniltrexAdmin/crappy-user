@@ -1,10 +1,22 @@
-use crate::domain::UserRegistrationError;
+use postgres_es::PostgresCqrs;
+use crate::domain::{RegisterUserCommand, User, UserDomainError};
 
-
-
-pub async fn register_user_command_handler() -> Result<(), UserRegistrationError> {
-    Ok(())
+#[tracing::instrument(
+name = "Register User Command Handler",
+skip(match_request_repository)
+)]
+pub async fn register_user_command_handler(
+    match_request_repository: impl MatchRequestRepository,
+    command: &RegisterUserCommand,
+    cqrs: PostgresCqrs<User>
+) -> Result<(), UserDomainError> {
+    let register_user_command = command.try_into()?;
+    cqrs.execute_with_metadata();
+    // User::handle(register_user_command, &());
+    // return match_request_repository.save(match_request).await;
 }
+
+
 
 
 

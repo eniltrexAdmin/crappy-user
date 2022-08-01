@@ -35,6 +35,10 @@ impl User {
         self.is_registered
     }
 
+    pub fn register_user() -> Result<Vec<UserEvent>, Self::Error> {
+
+    }
+
     pub fn apply_user_registered_event(&mut self, user_registered_event: UserRegisteredDomainEvent) {
         self.is_registered = true;
         self.email = Some(UserEmail::new(user_registered_event.email.as_str()).unwrap_or_else(|result| {

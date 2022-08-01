@@ -1,6 +1,7 @@
 use serde::{Serialize, Deserialize};
-use cqrs_es::DomainEvent;
+
 use uuid::Uuid;
+use crate::domain::DomainEvent;
 
 pub const USER_REGISTER_EVENT_TYPE: &str = "UserRegistered";
 pub const USER_REGISTER_EVENT_VERSION: &str = "1.0";
@@ -21,5 +22,7 @@ impl DomainEvent for UserRegisteredDomainEvent {
         String::from(USER_REGISTER_EVENT_VERSION)
     }
 }
+
+
 
 
