@@ -6,7 +6,7 @@ use async_trait::async_trait;
 
 #[derive(Serialize, Deserialize)]
 pub struct User {
-    id: UserId,
+    id: Option<UserId>, // init state has not even Id.
     email: Option<UserEmail>,
     password: Option<UserPassword>,
     is_registered: bool
@@ -14,16 +14,16 @@ pub struct User {
 
 
 impl User {
-    pub fn new(id: UserId) -> Self {
+    pub fn new() -> Self {
         User {
-            id,
+            id: None,
             email: None,
             password:None,
             is_registered: false
         }
     }
 
-    pub fn id(&self) -> UserId {
+    pub fn id(&self) -> Option<UserId> {
         self.id
     }
 
@@ -35,8 +35,24 @@ impl User {
         self.is_registered
     }
 
-    pub fn register_user() -> Result<Vec<UserEvent>, Self::Error> {
+    // all domain actions should assume an "init" state. Therefore all have &self.
+    pub fn register_user(&self, id:Uuid, email:&str, password: &str) -> Result<Vec<UserEvent>, Self::Error> {
+        if self.is_registered {
+            return Err(UserDomainError::UserAlreadyRegistered(self.email.as_ref().unwrap().value()));
+        }
 
+        let user_id = UserId::new(id);
+        let user_email = UserEmail::new(email)?;
+        let user_password = UserPassword::new(password)?;
+
+        let user_registered_event = UserRegisteredDomainEvent{
+            id: *user_id.value(),
+            email: user_email.value(),
+            password_hash: user_password.hash_string,
+            salt: user_password.salt
+        };
+        // should I return that or the user?
+        Ok(vec![UserEvent::RegisteredUser(user_registered_event)])
     }
 
     pub fn apply_user_registered_event(&mut self, user_registered_event: UserRegisteredDomainEvent) {
@@ -54,7 +70,7 @@ impl User {
 
 impl Default for User {
     fn default() -> Self {
-        User::new(UserId::new(Uuid::new_v4()))
+        User::new()
     }
 }
 
@@ -68,15 +84,6 @@ impl Aggregate for User {
     fn aggregate_type() -> String {
         "user".to_string()
     }
-
-    // I am still unsure whether I like this. So the function should be in the aggregate
-    // teh aggregate would save the events in its own thingy, in rust maybe more functional
-    // events are being returned. But all of this, I might like it to have it still
-    // in the aggregate, and the handler and command on application. Handler gets the events
-    // by checking the aggregate function "this->events()".
-
-    // also the treatment of error... I might want to trigger an already registered event instead
-    // of returning an error.
 
     // also what about checking the email already exists? I need to query the view first.
     async fn handle(&self, command: Self::Command, _service: &Self::Services) -> Result<Vec<Self::Event>, Self::Error> {
@@ -120,9 +127,9 @@ mod tests {
 
     #[test]
     fn new_user() {
-        let user_id = UserId::new(Uuid::new_v4());
-        let user = User::new(user_id.clone());
-        assert_eq!(user.id(), user_id);
+
+        let user = User::new();
+        assert_eq!(user.id(), None);
         assert_eq!(false, user.is_registered());
         assert_eq!(None, user.email());
     }

@@ -31,6 +31,7 @@ rand = "0.8.5"
 argon2 = "0.4.1"
 cqrs-es = "0.4.2"
 async-trait = "0.1.52"
+postgres-es = "0.4.4"
 
 [dependencies.sqlx]
 version = "0.5.7"

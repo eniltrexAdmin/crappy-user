@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use std::fmt;
-
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use uuid::Uuid;
