@@ -4,7 +4,7 @@ use rand::thread_rng;
 use crate::domain::UserDomainError;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct UserPassword{
     pub hash_string: String,
     pub salt: String

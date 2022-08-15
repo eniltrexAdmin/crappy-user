@@ -17,8 +17,6 @@ mod user_registered_event;
 pub use user_registered_event::*;
 mod user_domain_error;
 pub use user_domain_error::*;
-mod user_command;
-pub use user_command::*;
 mod register_user_command;
 pub use register_user_command::*;
 mod user_id;
