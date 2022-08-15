@@ -10,4 +10,9 @@ pub trait EventStoreInterface<A>: Send + Sync
         &self,
         aggregate_id: &Uuid,
     ) -> Result<Vec<EventEnvelope<A>>, A::Error>;
+    async fn save_events(
+        &self,
+        events: Vec<EventEnvelope<A>>,
+    ) -> Result<(), A::Error>;
 }
+

@@ -39,7 +39,7 @@ impl User {
 
     // all domain actions should assume an "init" state. Therefore all have &self.
     // since I decided commands are first class class domain citizens, I am passing it here.
-    pub fn register_user(&self, register_user_command: RegisterUserCommand) -> Result<Vec<UserEvent>, UserDomainError> {
+    pub fn register_user(&self, register_user_command: &RegisterUserCommand) -> Result<Vec<UserEvent>, UserDomainError> {
         if self.is_registered {
             return Err(UserDomainError::UserAlreadyRegistered(self.email.as_ref().unwrap().value()));
         }

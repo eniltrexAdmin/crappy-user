@@ -1,2 +1,2 @@
-mod register_user;
-pub use register_user::*;
+mod register_user_command_handler;
+pub use register_user_command_handler::*;

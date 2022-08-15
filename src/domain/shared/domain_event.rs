@@ -17,6 +17,7 @@ Serialize + DeserializeOwned + Clone + PartialEq + fmt::Debug + Sync + Send
 
 // copy from cqrs-es crate. Keeping the exact same since I am planning
 // to reuse also the event store repository to query from the event store.
+// HESITATING doesn't this belong to infra concerns?
 pub struct EventEnvelope<A>
     where
         A: EventSourcedAggregate,
