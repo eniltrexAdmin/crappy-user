@@ -1,5 +1,5 @@
-use std::fmt::{Display, Formatter};
 use serde::Serialize;
+use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Serialize, PartialEq)]
 pub enum UserDomainError {
@@ -8,22 +8,29 @@ pub enum UserDomainError {
     CouldNotGeneratePassword(String),
     ProblemRetrievingPassword(String),
     UserAlreadyRegistered(String),
-    CommandNotYetImplemented(String)
+    CommandNotYetImplemented(String),
 }
 impl std::error::Error for UserDomainError {}
 impl Display for UserDomainError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            UserDomainError::InvalidUuidUserId => write!(f,"Invalid Uuid for User Id"),
-            UserDomainError::InvalidUserEmail(error) => write!(f,"InvalidUserEmail: {}", error),
-            UserDomainError::CouldNotGeneratePassword(error) => write!(f,"Could Not Generate Password: {}", error),
-            UserDomainError::ProblemRetrievingPassword(error) => write!(f,"Could not retrieve password: {}", error),
-            UserDomainError::CommandNotYetImplemented(command) => write!(f, "Command {} is not implemented yet.", command),
-            UserDomainError::UserAlreadyRegistered(error) => write!(f, "User {} is already registered.", error)
+            UserDomainError::InvalidUuidUserId => write!(f, "Invalid Uuid for User Id"),
+            UserDomainError::InvalidUserEmail(error) => write!(f, "InvalidUserEmail: {}", error),
+            UserDomainError::CouldNotGeneratePassword(error) => {
+                write!(f, "Could Not Generate Password: {}", error)
+            }
+            UserDomainError::ProblemRetrievingPassword(error) => {
+                write!(f, "Could not retrieve password: {}", error)
+            }
+            UserDomainError::CommandNotYetImplemented(command) => {
+                write!(f, "Command {} is not implemented yet.", command)
+            }
+            UserDomainError::UserAlreadyRegistered(error) => {
+                write!(f, "User {} is already registered.", error)
+            }
         }
     }
 }
-
 
 // TODO think if I can either remove this one or the user_domain_error on to avoid having
 // too many errors.
@@ -31,7 +38,7 @@ impl Display for UserDomainError {
 pub struct UserRegistrationError(String);
 impl Display for UserRegistrationError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f,"{}", self.0)
+        write!(f, "{}", self.0)
     }
 }
 

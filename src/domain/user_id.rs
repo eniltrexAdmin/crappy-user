@@ -1,16 +1,16 @@
-use uuid::Uuid;
 use crate::domain::UserDomainError;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 // Serialize and deserialize because User has it.
 #[derive(Debug, PartialEq, Copy, Clone, Serialize, Deserialize)]
 pub struct UserId(Uuid);
 
 impl UserId {
-    pub fn from_string(value: &str) ->  Result<Self, UserDomainError> {
+    pub fn from_string(value: &str) -> Result<Self, UserDomainError> {
         let uuid = match Uuid::parse_str(value) {
             Err(_) => return Err(UserDomainError::InvalidUuidUserId),
-            Ok(uuid) => uuid
+            Ok(uuid) => uuid,
         };
         Ok(Self(uuid))
     }

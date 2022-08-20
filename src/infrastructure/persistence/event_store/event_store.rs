@@ -1,16 +1,19 @@
-// use cqrs_es::mem_store::MemStore;
-// use cqrs_es::{EventEnvelope, Query};
-// use crate::domain::User;
+// use crate::domain::{EventEnvelope, EventStoreInterface, User};
+// use uuid::Uuid;
 //
-// // let event_store = MemStore::<BankAccount>::default();
+// pub struct EventStorePostgres {}
 //
-// struct SimpleLoggingQuery {}
+// impl EventStoreInterface<User> for EventStorePostgres {
+//     async fn load_events(
+//         &self,
+//         aggregate_id: &Uuid,
+//     ) -> Result<Vec<EventEnvelope<A>>, crate::domain::event_sourced_aggregate::Error> {
+//         todo!()
+//     }
 //
-// #[async_trait]
-// impl Query<User> for SimpleLoggingQuery {
-//     async fn dispatch(&self, aggregate_id: &str, events: &[EventEnvelope<User>]) {
-//         for event in events {
-//             println!("{}-{}\n{:#?}", aggregate_id, event.sequence, &event.payload);
-//         }
+//     async fn save_events(
+//         &self,
+//         events: Vec<EventEnvelope<A>>,
+//     ) -> Result<(), crate::domain::event_sourced_aggregate::Error> {
 //     }
 // }

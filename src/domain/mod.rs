@@ -1,5 +1,5 @@
 #[path = "shared/event_sourced_aggregate.rs"]
-mod event_sourced_aggregate;
+pub(crate) mod event_sourced_aggregate;
 pub use event_sourced_aggregate::*;
 #[path = "shared/domain_event.rs"]
 mod domain_event;

@@ -1,29 +1,30 @@
 pub mod controllers;
 
-use std::net::TcpListener;
+use crate::configuration::Settings;
 use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
-use tracing_actix_web::TracingLogger;
-use tracing::log;
 use secrecy::ExposeSecret;
-use sqlx::{Connection, ConnectOptions, Executor, PgConnection, PgPool, postgres};
 use sqlx::postgres::PgPoolOptions;
-use crate::configuration::Settings;
+use sqlx::{postgres, ConnectOptions, Connection, Executor, PgConnection, PgPool};
+use std::net::TcpListener;
+use tracing::log;
+use tracing_actix_web::TracingLogger;
 
 pub struct CrappyUserApp {
     settings: Settings,
 }
 
 impl CrappyUserApp {
-    pub fn new(configuration: Settings) -> Self
-    {
-        Self { settings: configuration }
+    pub fn new(configuration: Settings) -> Self {
+        Self {
+            settings: configuration,
+        }
     }
 
     fn pg_connect_options(&self) -> postgres::PgConnectOptions {
         let ssl_mode = match self.settings.database.require_ssl {
             true => postgres::PgSslMode::Require,
-            false => postgres::PgSslMode::Prefer
+            false => postgres::PgSslMode::Prefer,
         };
 
         let log_level: log::LevelFilter =
@@ -37,7 +38,6 @@ impl CrappyUserApp {
                 _ => log::LevelFilter::Off,
             };
 
-
         let mut options = postgres::PgConnectOptions::new()
             .host(&self.settings.database.host)
             .username(&self.settings.database.username)
@@ -49,7 +49,8 @@ impl CrappyUserApp {
     }
 
     fn pg_connect_options_with_db(&self) -> postgres::PgConnectOptions {
-        self.pg_connect_options().database(&self.settings.database.database_name)
+        self.pg_connect_options()
+            .database(&self.settings.database.database_name)
     }
 
     pub async fn create_database_if_not_exists(&self) {
@@ -57,7 +58,13 @@ impl CrappyUserApp {
             .await
             .expect("Failed to connect to Postgres");
         connection
-            .execute(format!(r#"CREATE DATABASE "{}";"#, self.settings.database.database_name).as_str())
+            .execute(
+                format!(
+                    r#"CREATE DATABASE "{}";"#,
+                    self.settings.database.database_name
+                )
+                .as_str(),
+            )
             .await
             .expect("Failed to create database");
     }
@@ -67,7 +74,13 @@ impl CrappyUserApp {
             .await
             .expect("Failed to connect to Postgres");
         connection
-            .execute(format!(r#"DROP DATABASE "{}";"#, self.settings.database.database_name).as_str())
+            .execute(
+                format!(
+                    r#"DROP DATABASE "{}";"#,
+                    self.settings.database.database_name
+                )
+                .as_str(),
+            )
             .await
             .expect("Failed to drop database");
     }
@@ -99,8 +112,7 @@ impl CrappyUserApp {
 
         let address = format!(
             "{}:{}",
-            self.settings.application.host,
-            self.settings.application.port
+            self.settings.application.host, self.settings.application.port
         );
 
         let listener = TcpListener::bind(address)?;
@@ -116,8 +128,8 @@ impl CrappyUserApp {
                 // .route("/authenticate", web::get().to(controllers::get_match_requests))
                 .app_data(db_pool.clone())
         })
-            .listen(listener)?
-            .run();
+        .listen(listener)?
+        .run();
 
         Ok(ApplicationReady { server, port })
     }
@@ -125,7 +137,7 @@ impl CrappyUserApp {
 
 pub struct ApplicationReady {
     server: Server,
-    port: u16
+    port: u16,
 }
 impl ApplicationReady {
     pub async fn run_actix_server_until_stopped(self) -> Result<(), std::io::Error> {
@@ -136,7 +148,5 @@ impl ApplicationReady {
         self.port
     }
 
-    pub async fn stop_server(self) {
-
-    }
+    pub async fn stop_server(self) {}
 }

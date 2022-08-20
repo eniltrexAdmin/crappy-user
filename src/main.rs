@@ -1,9 +1,8 @@
-use crappy_user::{configuration, telemetry};
 use crappy_user::actix::CrappyUserApp;
+use crappy_user::{configuration, telemetry};
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
-
     let subscriber = telemetry::get_subscriber("zero2prod".into(), "info".into());
     telemetry::init_subscriber(subscriber);
 

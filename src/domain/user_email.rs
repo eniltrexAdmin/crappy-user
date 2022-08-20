@@ -1,21 +1,20 @@
-use std::str::FromStr;
-use email_address::EmailAddress;
 use crate::domain::UserDomainError;
+use email_address::EmailAddress;
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct UserEmail(EmailAddress);
 impl UserEmail {
     pub fn new(value: &str) -> Result<Self, UserDomainError> {
-            EmailAddress::from_str(value)
-            .map(|email_address|{UserEmail{ 0: email_address}})
-            .map_err(|error|{UserDomainError::InvalidUserEmail(error.to_string())})
+        EmailAddress::from_str(value)
+            .map(|email_address| UserEmail { 0: email_address })
+            .map_err(|error| UserDomainError::InvalidUserEmail(error.to_string()))
     }
     pub fn value(&self) -> String {
         self.0.clone().to_string()
     }
 }
-
 
 #[cfg(test)]
 mod tests {

@@ -1,24 +1,21 @@
-use secrecy::{Secret};
+use secrecy::Secret;
 
 const ENVIRONMENT_PREFIX: &str = "CRAPPYUSER";
 const ENVIRONMENT_SEPARATOR: &str = "__";
 
-#[derive(serde::Deserialize)]
-#[derive(Debug)]
+#[derive(serde::Deserialize, Debug)]
 pub struct Settings {
     pub database: DatabaseSettings,
     pub application: ApplicationSettings,
 }
 
-#[derive(serde::Deserialize)]
-#[derive(Debug)]
+#[derive(serde::Deserialize, Debug)]
 pub struct ApplicationSettings {
     pub port: u16,
     pub host: String,
 }
 
-#[derive(serde::Deserialize)]
-#[derive(Debug)]
+#[derive(serde::Deserialize, Debug)]
 pub struct DatabaseSettings {
     pub username: String,
     pub password: Secret<String>,
@@ -26,22 +23,28 @@ pub struct DatabaseSettings {
     pub host: String,
     pub database_name: String,
     pub require_ssl: bool,
-    pub log_level: String
+    pub log_level: String,
 }
 
 pub fn get_configuration() -> Result<Settings, config::ConfigError> {
-    let _environment: Environment = std::env::var(format!("{}{}{}", &ENVIRONMENT_PREFIX, &ENVIRONMENT_SEPARATOR, "ENVIRONMENT"))
-        .unwrap_or_else(|_| "local".into())
-        .try_into()
-        .expect("Failed to parse CRAPPY-USER_ENVIRONMENT.");
+    let _environment: Environment = std::env::var(format!(
+        "{}{}{}",
+        &ENVIRONMENT_PREFIX, &ENVIRONMENT_SEPARATOR, "ENVIRONMENT"
+    ))
+    .unwrap_or_else(|_| "local".into())
+    .try_into()
+    .expect("Failed to parse CRAPPY-USER_ENVIRONMENT.");
 
-    let log_level = std::env::var(format!("{}{}{}", &ENVIRONMENT_PREFIX, &ENVIRONMENT_SEPARATOR, "CRAPPY__DATABASE__LOG_LEVEL"))
-        // .unwrap_or_else(|_| String::from("trace"));
-        .unwrap_or_default();
+    let log_level = std::env::var(format!(
+        "{}{}{}",
+        &ENVIRONMENT_PREFIX, &ENVIRONMENT_SEPARATOR, "CRAPPY__DATABASE__LOG_LEVEL"
+    ))
+    // .unwrap_or_else(|_| String::from("trace"));
+    .unwrap_or_default();
 
     config::Config::builder()
         .add_source(config::Environment::with_prefix(&ENVIRONMENT_PREFIX).separator("__"))
-        .set_override("database.log_level",log_level)?
+        .set_override("database.log_level", log_level)?
         .build()?
         .try_deserialize() // fuck I am amazed, it knows the type from Result<Settings <-- from that!
 }
@@ -50,7 +53,7 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
 pub enum Environment {
     Local,
     Production,
-    DockerCompose
+    DockerCompose,
 }
 impl Environment {
     pub fn file_config(&self) -> &'static str {

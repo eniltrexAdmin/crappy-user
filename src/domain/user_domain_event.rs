@@ -1,26 +1,22 @@
 use crate::domain::{DomainEvent, UserRegisteredDomainEvent};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub enum UserEvent{
-    RegisteredUser(UserRegisteredDomainEvent)
+pub enum UserEvent {
+    RegisteredUser(UserRegisteredDomainEvent),
 }
 // I would like to force all variants to have the trait DomainEvent, but I don't think
 // it's possible
-impl DomainEvent for UserEvent{
+impl DomainEvent for UserEvent {
     fn event_type(&self) -> String {
-        return match self{
-            UserEvent::RegisteredUser(event) => {
-                event.event_type()
-            }
-        }
+        return match self {
+            UserEvent::RegisteredUser(event) => event.event_type(),
+        };
     }
 
     fn event_version(&self) -> String {
-        return match self{
-            UserEvent::RegisteredUser(event) => {
-                event.event_version()
-            }
-        }
+        return match self {
+            UserEvent::RegisteredUser(event) => event.event_version(),
+        };
     }
 }

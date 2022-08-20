@@ -1,7 +1,7 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-use uuid::Uuid;
 use crate::domain::DomainEvent;
+use uuid::Uuid;
 
 pub const USER_REGISTER_EVENT_TYPE: &str = "UserRegistered";
 pub const USER_REGISTER_EVENT_VERSION: &str = "1.0";
@@ -11,7 +11,7 @@ pub struct UserRegisteredDomainEvent {
     pub id: Uuid,
     pub email: String,
     pub password_hash: String,
-    pub salt: String
+    pub salt: String,
 }
 impl DomainEvent for UserRegisteredDomainEvent {
     fn event_type(&self) -> String {
@@ -22,7 +22,3 @@ impl DomainEvent for UserRegisteredDomainEvent {
         String::from(USER_REGISTER_EVENT_VERSION)
     }
 }
-
-
-
-
