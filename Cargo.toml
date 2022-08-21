@@ -16,6 +16,7 @@ name = "crappy-user"
 actix-web = "4.0.0"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 serde = { version = "1", features = ["derive"]}
+serde_json = "1.0.82"
 uuid = { version = "1.1.2", features = ["v4", "serde"] }
 log = "0.4"
 secrecy = { version = "0.8", features = ["serde"] }
@@ -32,6 +33,7 @@ argon2 = "0.4.1"
 cqrs-es = "0.4.2"
 async-trait = "0.1.52"
 postgres-es = "0.4.4"
+chrono = { version="0.4.15", features = ["serde"]  }
 
 [dependencies.sqlx]
 version = "0.5.7"
@@ -43,7 +45,8 @@ features = [
     "uuid",
     "chrono",
     "migrate",
-    "offline"
+    "offline",
+    "json"
 ]
 
 [dev-dependencies]

@@ -10,9 +10,6 @@ services:
       - POSTGRES_DB=crappy-user
     ports:
       - '5432:5432'
-    volumes:
-      - db:/var/lib/postgresql/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/create_tables.sql
 volumes:
   db:
     driver: local

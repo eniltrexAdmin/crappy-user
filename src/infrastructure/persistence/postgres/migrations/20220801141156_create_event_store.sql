@@ -1,24 +1,26 @@
+-- noinspection SqlDialectInspectionForFile
+
 -- Add migration script here
 CREATE TABLE events
 (
-    aggregate_type text                         NOT NULL,
-    aggregate_id   text                         NOT NULL,
-    sequence       bigint CHECK (sequence >= 0) NOT NULL,
-    event_type     text                         NOT NULL,
-    event_version  text                         NOT NULL,
-    payload        json                         NOT NULL,
-    metadata       json                         NOT NULL,
-    timestamp      timestamp with time zone DEFAULT (CURRENT_TIMESTAMP),
+    aggregate_type text,
+    aggregate_id   uuid,
+    sequence       SERIAL,
+    event_type     text,
+    event_version  text,
+    payload        json,
+    metadata       json,
+    timestamp       timestamptz,
     PRIMARY KEY (aggregate_type, aggregate_id, sequence)
 );
 
 CREATE TABLE snapshots
 (
-    aggregate_type   text                                 NOT NULL,
-    aggregate_id     text                                 NOT NULL,
-    last_sequence    bigint CHECK (last_sequence >= 0)    NOT NULL,
-    current_snapshot bigint CHECK (current_snapshot >= 0) NOT NULL,
-    payload          json                                 NOT NULL,
-    timestamp        timestamp with time zone DEFAULT (CURRENT_TIMESTAMP),
+    aggregate_type   text,
+    aggregate_id     uuid,
+    last_sequence    bigint,
+    current_snapshot bigint,
+    payload          json,
+    timestamp       timestamptz,
     PRIMARY KEY (aggregate_type, aggregate_id, last_sequence)
 );

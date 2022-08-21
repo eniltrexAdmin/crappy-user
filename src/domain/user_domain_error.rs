@@ -9,6 +9,8 @@ pub enum UserDomainError {
     ProblemRetrievingPassword(String),
     UserAlreadyRegistered(String),
     CommandNotYetImplemented(String),
+    CouldNotLoadUserEvents(String),
+    CouldNotSaveUserEvents(String),
 }
 impl std::error::Error for UserDomainError {}
 impl Display for UserDomainError {
@@ -28,24 +30,12 @@ impl Display for UserDomainError {
             UserDomainError::UserAlreadyRegistered(error) => {
                 write!(f, "User {} is already registered.", error)
             }
+            UserDomainError::CouldNotLoadUserEvents(error) => {
+                write!(f, "Problem loading user: {}", error)
+            },
+            UserDomainError::CouldNotSaveUserEvents(error) => {
+                write!(f, "Problem saving user events: {}", error)
+            }
         }
-    }
-}
-
-// TODO think if I can either remove this one or the user_domain_error on to avoid having
-// too many errors.
-#[derive(Debug)]
-pub struct UserRegistrationError(String);
-impl Display for UserRegistrationError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl std::error::Error for UserRegistrationError {}
-
-impl From<&str> for UserRegistrationError {
-    fn from(message: &str) -> Self {
-        UserRegistrationError(message.to_string())
     }
 }

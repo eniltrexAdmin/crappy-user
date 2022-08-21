@@ -7,5 +7,5 @@ pub mod domain;
 #[path = "infrastructure/telemetry/telemetry.rs"]
 pub mod telemetry;
 // #[path = "infrastructure/persistence/mod.rs"] pub mod persistence;
-#[path = "infrastructure/persistence/event_store/event_store.rs"]
+#[path = "infrastructure/persistence/postgres/event_store.rs"]
 pub mod event_store;
