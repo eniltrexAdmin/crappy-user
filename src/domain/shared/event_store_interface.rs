@@ -35,3 +35,9 @@ impl Display for EventStoreError {
     }
 }
 impl Error for EventStoreError {}
+
+impl From<serde_json::Error> for EventStoreError {
+    fn from(err: serde_json::Error) -> Self {
+        EventStoreError::SerializationError(err.to_string())
+    }
+}

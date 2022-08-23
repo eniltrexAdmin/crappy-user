@@ -30,3 +30,7 @@ where
     /// The event payload with all business information.
     pub payload: A::Event,
 }
+
+pub struct ReadyToPersistEvent {
+
+}

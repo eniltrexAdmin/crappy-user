@@ -4,9 +4,9 @@ use crate::configuration::Settings;
 use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
 use secrecy::ExposeSecret;
-use sqlx::postgres::PgPoolOptions;
 use sqlx::{postgres, ConnectOptions, Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
+use sqlx::postgres::PgPoolOptions;
 use tracing::log;
 use tracing_actix_web::TracingLogger;
 
@@ -97,13 +97,13 @@ impl CrappyUserApp {
 
     pub fn get_connection_pool(&self) -> PgPool {
         postgres::PgPoolOptions::new()
-            .connect_timeout(std::time::Duration::from_secs(2))
+            .acquire_timeout(std::time::Duration::from_secs(2))
             .connect_lazy_with(self.pg_connect_options_with_db())
     }
 
     pub async fn build_actix_server(&self) -> Result<ApplicationReady, std::io::Error> {
         let connection_pool = PgPoolOptions::new()
-            .connect_timeout(std::time::Duration::from_secs(2))
+            .acquire_timeout(std::time::Duration::from_secs(2))
             .connect_with(self.pg_connect_options_with_db())
             .await
             .expect("Failed to connect to Postgres.");
@@ -124,7 +124,7 @@ impl CrappyUserApp {
             App::new()
                 .wrap(TracingLogger::default())
                 .route("/health_check", web::get().to(controllers::health_check))
-                // .route("/register", web::post().to(controllers::post_match_request))
+                .route("/register", web::post().to(controllers::register_user))
                 // .route("/authenticate", web::get().to(controllers::get_match_requests))
                 .app_data(db_pool.clone())
         })

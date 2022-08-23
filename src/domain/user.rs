@@ -2,9 +2,9 @@ use crate::domain::*;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct User {
-    id: Option<UserId>, // init state has not even Id.
+    id: Option<UserId>, // init default state has not even Id.
     email: Option<UserEmail>,
     password: Option<UserPassword>,
     is_registered: bool,
@@ -24,6 +24,9 @@ impl User {
         self.id
     }
 
+    // all of these as_ref are a little bit fishy, only used for tests
+    // and probable what the compiler wanted me to do was to
+    // impl AsRef<T> for UserEmail and so on.
     pub fn email_as_ref(&self) -> &Option<UserEmail> {
         &self.email
     }
@@ -58,9 +61,6 @@ impl User {
             password_hash: user_password.hash_string,
             salt: user_password.salt,
         };
-        // should I return that or the user?
-        // copying more form cqrs_es:rust, and going for the events. even we do not need
-        // to care that the user has been "modified", it doesn't need to be even mut.
         Ok(vec![UserEvent::RegisteredUser(user_registered_event)])
     }
 

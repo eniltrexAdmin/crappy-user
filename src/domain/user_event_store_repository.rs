@@ -8,7 +8,7 @@ pub struct UserEventStoreRepository<ES>
 where
     ES: EventStoreInterface<User>,
 {
-    store: ES,
+    pub store: ES,
 }
 
 impl<ES> UserEventStoreRepository<ES>
