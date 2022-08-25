@@ -4,9 +4,9 @@ use crate::configuration::Settings;
 use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
 use secrecy::ExposeSecret;
+use sqlx::postgres::PgPoolOptions;
 use sqlx::{postgres, ConnectOptions, Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
-use sqlx::postgres::PgPoolOptions;
 use tracing::log;
 use tracing_actix_web::TracingLogger;
 

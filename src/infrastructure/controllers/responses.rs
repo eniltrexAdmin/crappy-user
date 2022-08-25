@@ -1,11 +1,11 @@
-use actix_web::{HttpResponse, ResponseError};
+use crate::domain::UserDomainError;
 use actix_web::body::BoxBody;
 use actix_web::http::StatusCode;
+use actix_web::{HttpResponse, ResponseError};
 use serde::Serialize;
-use crate::domain::UserDomainError;
 
 #[derive(Debug, Serialize)]
-pub struct NoContentResponse{}
+pub struct NoContentResponse {}
 
 impl ResponseError for UserDomainError {
     fn status_code(&self) -> StatusCode {
@@ -17,12 +17,11 @@ impl ResponseError for UserDomainError {
             UserDomainError::UserAlreadyRegistered(_string) => StatusCode::BAD_REQUEST,
             UserDomainError::CommandNotYetImplemented(_string) => StatusCode::INTERNAL_SERVER_ERROR,
             UserDomainError::CouldNotLoadUserEvents(_string) => StatusCode::INTERNAL_SERVER_ERROR,
-            UserDomainError::CouldNotSaveUserEvents(_string) => StatusCode::INTERNAL_SERVER_ERROR
-        }
+            UserDomainError::CouldNotSaveUserEvents(_string) => StatusCode::INTERNAL_SERVER_ERROR,
+        };
     }
 
     fn error_response(&self) -> HttpResponse<BoxBody> {
-        HttpResponse::build(self.status_code())
-            .json(self)
+        HttpResponse::build(self.status_code()).json(self)
     }
 }

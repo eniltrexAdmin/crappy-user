@@ -19,7 +19,7 @@ where
 #[derive(Debug)]
 pub enum EventStoreError {
     DatabaseConnectionError(String),
-    SerializationError(String)
+    SerializationError(String),
 }
 
 impl Display for EventStoreError {
@@ -27,7 +27,7 @@ impl Display for EventStoreError {
         match self {
             EventStoreError::DatabaseConnectionError(error) => {
                 write!(f, "Database problem: {}.", error)
-            },
+            }
             EventStoreError::SerializationError(error) => {
                 write!(f, "Serialization problem, probably serde: {}.", error)
             }

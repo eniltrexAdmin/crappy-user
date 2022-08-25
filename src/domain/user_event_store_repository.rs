@@ -1,8 +1,8 @@
-use chrono::Utc;
 use crate::domain::{
     EventEnvelope, EventSourcedAggregate, EventStoreError, EventStoreInterface, User,
     UserDomainError, UserEvent, UserId,
 };
+use chrono::Utc;
 
 pub struct UserEventStoreRepository<ES>
 where
@@ -42,10 +42,10 @@ where
                 metadata: Default::default(),
             })
         }
-        self.store.save_events(wrapped_events)
-            .await
-            .map_err(|event_store_error: EventStoreError| {
+        self.store.save_events(wrapped_events).await.map_err(
+            |event_store_error: EventStoreError| {
                 UserDomainError::CouldNotSaveUserEvents(event_store_error.to_string())
-            })
+            },
+        )
     }
 }

@@ -32,7 +32,7 @@ impl Display for UserDomainError {
             }
             UserDomainError::CouldNotLoadUserEvents(error) => {
                 write!(f, "Problem loading user: {}", error)
-            },
+            }
             UserDomainError::CouldNotSaveUserEvents(error) => {
                 write!(f, "Problem saving user events: {}", error)
             }

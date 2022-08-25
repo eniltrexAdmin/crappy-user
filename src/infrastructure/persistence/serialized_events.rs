@@ -1,16 +1,18 @@
-use chrono::{DateTime, Utc};
-use uuid::Uuid;
-use serde_json::Value;
 use crate::domain::{DomainEvent, EventEnvelope, EventSourcedAggregate, EventStoreError};
+use chrono::{DateTime, Utc};
+use serde_json::Value;
+use uuid::Uuid;
 
-pub struct SerializedEvent{
+#[derive(sqlx::FromRow)]
+pub struct SerializedEvent {
     pub aggregate_type: String,
     pub aggregate_id: Uuid,
     pub event_type: String,
     pub event_version: String,
     pub payload: Value,
     pub metadata: Value,
-    pub occurred_at:  DateTime<Utc>
+    #[sqlx(rename = "timestamp")]
+    pub occurred_at: DateTime<Utc>,
 }
 
 impl SerializedEvent {
@@ -22,7 +24,7 @@ impl SerializedEvent {
         event_version: String,
         payload: Value,
         metadata: Value,
-        occurred_at:  DateTime<Utc>
+        occurred_at: DateTime<Utc>,
     ) -> Self {
         Self {
             aggregate_type,
@@ -31,7 +33,7 @@ impl SerializedEvent {
             event_version,
             payload,
             metadata,
-            occurred_at
+            occurred_at,
         }
     }
 }
@@ -62,19 +64,19 @@ impl<A: EventSourcedAggregate> TryFrom<&EventEnvelope<A>> for SerializedEvent {
             event_version,
             payload,
             metadata,
-            occurred_at: event.occurred_at
+            occurred_at: event.occurred_at,
         })
     }
 }
 
-impl<A: EventSourcedAggregate>  TryFrom<SerializedEvent> for EventEnvelope<A> {
+impl<A: EventSourcedAggregate> TryFrom<SerializedEvent> for EventEnvelope<A> {
     type Error = EventStoreError;
 
     fn try_from(serialized_event: SerializedEvent) -> Result<Self, Self::Error> {
         // impl from serde in this error is done in event_store_interface.
         let payload = serde_json::from_value(serialized_event.payload)?;
         let metadata = serde_json::from_value(serialized_event.metadata)?;
-        Ok(EventEnvelope{
+        Ok(EventEnvelope {
             aggregate_id: serialized_event.aggregate_id,
             occurred_at: serialized_event.occurred_at,
             payload,
