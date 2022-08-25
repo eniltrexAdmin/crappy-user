@@ -66,3 +66,19 @@ impl<A: EventSourcedAggregate> TryFrom<&EventEnvelope<A>> for SerializedEvent {
         })
     }
 }
+
+impl<A: EventSourcedAggregate>  TryFrom<SerializedEvent> for EventEnvelope<A> {
+    type Error = EventStoreError;
+
+    fn try_from(serialized_event: SerializedEvent) -> Result<Self, Self::Error> {
+        // impl from serde in this error is done in event_store_interface.
+        let payload = serde_json::from_value(serialized_event.payload)?;
+        let metadata = serde_json::from_value(serialized_event.metadata)?;
+        Ok(EventEnvelope{
+            aggregate_id: serialized_event.aggregate_id,
+            occurred_at: serialized_event.occurred_at,
+            payload,
+            metadata,
+        })
+    }
+}

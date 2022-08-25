@@ -2,9 +2,11 @@ use std::fmt::Debug;
 use crate::domain::{EventEnvelope, EventSourcedAggregate, EventStoreError, EventStoreInterface};
 use async_trait::async_trait;
 use std::marker::PhantomData;
+use chrono::{DateTime, Utc};
+use serde_json::Value;
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
-use crate::serialized_event::serialize_events;
+use crate::serialized_event::{serialize_events, SerializedEvent};
 
 pub struct EventStorePostgres<'a, A>
 where
@@ -23,6 +25,24 @@ where
             _phantom: PhantomData
         }
     }
+    fn fetch_serialized_events(row: PgRow) -> Result<SerializedEvent, EventStoreError> {
+        let aggregate_type: String = row.get("aggregate_type");
+        let aggregate_id: Uuid = row.get("aggregate_id");
+        let occurred_at:DateTime<Utc> =  row.get("timestamp");
+        let event_type: String = row.get("event_type");
+        let event_version: String = row.get("event_version");
+        let payload: Value = row.get("payload");
+        let metadata: Value = row.get("metadata");
+        Ok(SerializedEvent::new(
+            aggregate_type,
+            aggregate_id,
+            event_type,
+            event_version,
+            payload,
+            metadata,
+            occurred_at
+        ))
+    }
 }
 
 #[async_trait]
@@ -34,7 +54,22 @@ where
         &self,
         aggregate_id: &Uuid,
     ) -> Result<Vec<EventEnvelope<A>>, EventStoreError> {
-        todo!()
+        let mut rows = sqlx::query("SELECT aggregate_type, aggregate_id, event_type, event_version, payload, metadata, timestamp
+                  FROM events
+                  WHERE aggregate_type = $1 AND aggregate_id = $2
+                  ORDER BY sequence")
+            .bind(A::aggregate_type())
+            .bind(aggregate_id)
+            .fetch(&self.pool);
+        let mut result: Vec<EventEnvelope<A>> = Default::default();
+        while let Some(row) = rows
+            .try_next()
+            .await?
+        {
+            result.push(EventStorePostgres::fetch_serialized_events(row)?.try_into()?);
+        }
+
+        Ok(result)
     }
 
     #[tracing::instrument(

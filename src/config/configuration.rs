@@ -46,7 +46,7 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
         .add_source(config::Environment::with_prefix(&ENVIRONMENT_PREFIX).separator("__"))
         .set_override("database.log_level", log_level)?
         .build()?
-        .try_deserialize() // fuck I am amazed, it knows the type from Result<Settings <-- from that!
+        .try_deserialize()
 }
 
 //I leave it here since this "try_into()" when this implements try_from is very interesting!
