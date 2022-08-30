@@ -9,5 +9,4 @@ pub trait EventSourcedAggregate: Default + Sync + Send {
     type Error: std::error::Error;
     fn aggregate_type() -> String;
     fn apply(&mut self, event: Self::Event);
-    // not handle.
 }

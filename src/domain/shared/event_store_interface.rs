@@ -14,6 +14,10 @@ where
         aggregate_id: &Uuid,
     ) -> Result<Vec<EventEnvelope<A>>, EventStoreError>;
     async fn save_events(&self, events: Vec<EventEnvelope<A>>) -> Result<(), EventStoreError>;
+    async fn load_all_events(
+        &self,
+        last_event_read: u64
+    ) -> Result<Vec<EventEnvelope<A>>, EventStoreError>;
 }
 
 #[derive(Debug)]

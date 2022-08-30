@@ -31,6 +31,7 @@ impl<A> EventStoreInterface<A> for EventStorePostgres<'_, A>
 where
     A: EventSourcedAggregate + Debug,
 {
+    #[tracing::instrument(name = "Loading events from the message store", skip(self))]
     async fn load_events(
         &self,
         aggregate_id: &Uuid,
@@ -41,6 +42,26 @@ where
                   ORDER BY sequence")
             .bind(A::aggregate_type())
             .bind(aggregate_id)
+            .fetch(self.pool);
+        let mut result: Vec<EventEnvelope<A>> = Default::default();
+        while let Some(row) = rows.try_next().await? {
+            result.push(SerializedEvent::from_row(&row)?.try_into()?);
+        }
+
+        Ok(result)
+    }
+
+    #[tracing::instrument(name = "Loading all the events for the aggregate", skip(self))]
+    async fn load_all_events(
+        &self,
+        last_event_read: u64
+    ) -> Result<Vec<EventEnvelope<A>>, EventStoreError> {
+        let mut rows = sqlx::query("SELECT aggregate_type, aggregate_id, event_type, event_version, payload, metadata, timestamp
+                  FROM events
+                  WHERE aggregate_type = $1 AND sequence > $2
+                  ORDER BY sequence")
+            .bind(A::aggregate_type())
+            .bind(last_event_read)
             .fetch(self.pool);
         let mut result: Vec<EventEnvelope<A>> = Default::default();
         while let Some(row) = rows.try_next().await? {
