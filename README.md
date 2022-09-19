@@ -2,7 +2,7 @@
 
 Micro for user authentication.
 
-This is an independent micro from the crappy ecosystem.
+This is an independent micro from the crappy ecosystem. 
 
 
 ## Decision that should be easy to change in the future:
