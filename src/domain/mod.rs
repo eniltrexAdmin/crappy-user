@@ -29,5 +29,5 @@ mod user_view_repository;
 pub use user_view_repository::*;
 mod user_credentials_view;
 pub use user_credentials_view::*;
-mod user_list_view;
-pub use user_list_view::*;
+mod user_read_model;
+pub use user_read_model::*;

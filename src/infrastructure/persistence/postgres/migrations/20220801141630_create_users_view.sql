@@ -1,7 +1,5 @@
--- CREATE TABLE user_view
--- (
---     view_id text                        NOT NULL,
---     version bigint CHECK (version >= 0) NOT NULL,
---     payload json                        NOT NULL,
---     PRIMARY KEY (view_id)
--- );
+CREATE TABLE user_credentials_view
+(
+    user_email text                        NOT NULL,
+    user_hash text                       NOT NULL,
+);

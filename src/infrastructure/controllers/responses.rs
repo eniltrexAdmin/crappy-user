@@ -1,4 +1,4 @@
-use crate::domain::UserDomainError;
+use crate::domain::{UserDomainError, UserViewRepositoryError};
 use actix_web::body::BoxBody;
 use actix_web::http::StatusCode;
 use actix_web::{HttpResponse, ResponseError};
@@ -24,4 +24,8 @@ impl ResponseError for UserDomainError {
     fn error_response(&self) -> HttpResponse<BoxBody> {
         HttpResponse::build(self.status_code()).json(self)
     }
+}
+
+impl ResponseError for UserViewRepositoryError {
+
 }
