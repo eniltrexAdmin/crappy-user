@@ -3,7 +3,7 @@ use crappy_user::{configuration, telemetry};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let subscriber = telemetry::get_subscriber("zero2prod".into(), "info".into());
+    let subscriber = telemetry::get_subscriber("crappy-user".into(), "info".into());
     telemetry::init_subscriber(subscriber);
 
     let configuration = configuration::get_configuration().expect("Failed to read configuration.");

@@ -8,7 +8,7 @@ use crate::domain::{
     skip(user_event_store_repository)
 )]
 pub async fn register_user_command_handler(
-    user_event_store_repository: UserEventStoreRepository<impl EventStoreInterface<User>>,
+    user_event_store_repository: &UserEventStoreRepository<impl EventStoreInterface<User>>,
     command: &RegisterUserCommand,
 ) -> Result<(), UserDomainError> {
     let user_id = UserId::new(command.id);
