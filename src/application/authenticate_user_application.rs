@@ -1,4 +1,4 @@
-use crate::domain::{EventStoreInterface, LogInCommand, User, UserEventStoreRepository, UserId, UserViewRepositoryError, UserViewRepositoryInterface};
+use crate::domain::{EventStoreInterface, LogInCommand, User, UserEmail, UserEventStoreRepository, UserId, UserViewRepositoryError, UserViewRepositoryInterface};
 
 #[tracing::instrument(
 name = "Authenticate application",
@@ -6,7 +6,7 @@ skip(password, view_repository, user_event_store_repository)
 )]
 pub async fn authenticate_user(
     email: String,
-    password: String,
+    password_attempt: String,
     view_repository: &impl UserViewRepositoryInterface,
     user_event_store_repository: &UserEventStoreRepository<impl EventStoreInterface<User>>
 ) -> Result<(), UserViewRepositoryError>  {
@@ -23,11 +23,17 @@ pub async fn authenticate_user(
     // if not, write event B // if not write event B
     // 4. REturn JWT, write event A // return JWT.
 
-
-    // 2 bigquestions: 1. Aggregate less Domain Events? (user tried to login with inexistent email address)
-    // 2. application using view data and then writing domain events??
-    // 3. I WOPNTR HAVE UUID PROBABLY!
     let user_id = UserId::new(command.id);
+    let user_email = UserEmail::new(&email)?;
+    let credentials_view = view_repository.retrieve_user_credential_by_email(&user_email)?;
+
+
+    let password_hash = PasswordHash::new(&user_password.hash_string).unwrap();
+
+    let alg: &[&dyn PasswordVerifier] = &[&Argon2::default()];
+
+
+
     user_event_store_repository
         .save_events(user_id, events)
         .await?;

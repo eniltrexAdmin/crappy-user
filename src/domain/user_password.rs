@@ -24,6 +24,8 @@ impl UserPassword {
     pub fn from_storage(hash_string: String, salt: String) -> Self {
         UserPassword { hash_string, salt }
     }
+
+    pub fn validate_password(password_attempt: &str) -> Result<(),>
 }
 
 #[cfg(test)]
