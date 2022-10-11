@@ -15,6 +15,6 @@ pub async fn register_user(
         store: postgre_event_store_repository,
     };
 
-    register_user_command_handler(user_repository, &request).await?;
+    register_user_command_handler(&user_repository, &request).await?;
     Ok(HttpResponse::Created().json(NoContentResponse {}))
 }

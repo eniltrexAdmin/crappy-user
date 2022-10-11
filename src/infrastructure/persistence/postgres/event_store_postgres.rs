@@ -51,26 +51,6 @@ where
         Ok(result)
     }
 
-    #[tracing::instrument(name = "Loading all the events for the aggregate", skip(self))]
-    async fn load_all_events(
-        &self,
-        last_event_read: u64
-    ) -> Result<Vec<EventEnvelope<A>>, EventStoreError> {
-        let mut rows = sqlx::query("SELECT aggregate_type, aggregate_id, event_type, event_version, payload, metadata, timestamp
-                  FROM events
-                  WHERE aggregate_type = $1 AND sequence > $2
-                  ORDER BY sequence")
-            .bind(A::aggregate_type())
-            .bind(last_event_read)
-            .fetch(self.pool);
-        let mut result: Vec<EventEnvelope<A>> = Default::default();
-        while let Some(row) = rows.try_next().await? {
-            result.push(SerializedEvent::from_row(&row)?.try_into()?);
-        }
-
-        Ok(result)
-    }
-
     #[tracing::instrument(name = "Saving Events to PostgresSQL", skip(self))]
     async fn save_events(&self, events: Vec<EventEnvelope<A>>) -> Result<(), EventStoreError> {
         let serialized_events = serialize_events(&events)?;
@@ -90,6 +70,26 @@ where
         }
         tx.commit().await?;
         Ok(())
+    }
+
+    #[tracing::instrument(name = "Loading all the events for the aggregate", skip(self))]
+    async fn load_all_events(
+        &self,
+        last_event_read: i64
+    ) -> Result<Vec<EventEnvelope<A>>, EventStoreError> {
+        let mut rows = sqlx::query("SELECT aggregate_type, aggregate_id, event_type, event_version, payload, metadata, timestamp
+                  FROM events
+                  WHERE aggregate_type = $1 AND sequence > $2
+                  ORDER BY sequence")
+            .bind(A::aggregate_type())
+            .bind(last_event_read)
+            .fetch(self.pool);
+        let mut result: Vec<EventEnvelope<A>> = Default::default();
+        while let Some(row) = rows.try_next().await? {
+            result.push(SerializedEvent::from_row(&row)?.try_into()?);
+        }
+
+        Ok(result)
     }
 }
 
