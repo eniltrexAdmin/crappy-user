@@ -33,6 +33,11 @@ pub async fn authenticate_user(
     let alg: &[&dyn PasswordVerifier] = &[&Argon2::default()];
 
 
+    // I tihnk I know what to do!, I will make a sync call to a command handler
+    // that will execute the stuff! maybe it's exra overhead, and think on how to
+    // maybe avoid this file "xxx_application" all together, but  I think I like it
+    // lets seee where we go
+
 
     user_event_store_repository
         .save_events(user_id, events)
