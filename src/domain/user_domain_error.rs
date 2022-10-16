@@ -11,6 +11,7 @@ pub enum UserDomainError {
     CommandNotYetImplemented(String),
     CouldNotLoadUserEvents(String),
     CouldNotSaveUserEvents(String),
+    IncorrectPassword
 }
 impl std::error::Error for UserDomainError {}
 impl Display for UserDomainError {
@@ -35,7 +36,8 @@ impl Display for UserDomainError {
             }
             UserDomainError::CouldNotSaveUserEvents(error) => {
                 write!(f, "Problem saving user events: {}", error)
-            }
+            },
+            UserDomainError::IncorrectPassword => write!(f, "Password did not match"),
         }
     }
 }

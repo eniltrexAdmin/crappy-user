@@ -1,37 +1,38 @@
 use crate::domain::*;
 use async_trait::async_trait;
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct User {
-    id: Option<UserId>, // init default state has not even Id.
-    email: Option<UserEmail>,
-    password: Option<UserPassword>,
+    id: UserId, // init default state has not even Id.
+    email: UserEmail,
+    password: UserPassword,
     is_registered: bool,
 }
 
 impl User {
-    pub fn new() -> Self {
+    pub fn new(id: UserId, email: UserEmail, password: UserPassword) -> Self {
         User {
-            id: None,
-            email: None,
-            password: None,
+            id,
+            email,
+            password,
             is_registered: false,
         }
     }
 
-    pub fn id(&self) -> Option<UserId> {
+    pub fn id(&self) -> UserId {
         self.id
     }
 
     // all of these as_ref are a little bit fishy, only used for tests
     // and probable what the compiler wanted me to do was to
     // impl AsRef<T> for UserEmail and so on.
-    pub fn email_as_ref(&self) -> &Option<UserEmail> {
+    pub fn email_as_ref(&self) -> &UserEmail {
         &self.email
     }
 
-    pub fn password_as_ref(&self) -> &Option<UserPassword> {
+    pub fn password_as_ref(&self) -> &UserPassword {
         &self.password
     }
 
@@ -44,10 +45,10 @@ impl User {
     pub fn register_user(
         &self,
         register_user_command: &RegisterUserCommand,
-    ) -> Result<Vec<UserEvent>, UserDomainError> {
+    ) -> Result<Vec<UserDomainEvent>, UserDomainError> {
         if self.is_registered {
             return Err(UserDomainError::UserAlreadyRegistered(
-                self.email.as_ref().unwrap().value(),
+                self.email.value(),
             ));
         }
 
@@ -60,34 +61,68 @@ impl User {
             email: user_email.value(),
             password_hash: user_password.hash_string,
             salt: user_password.salt,
+            occurred_at: Utc::now()
         };
-        Ok(vec![UserEvent::RegisteredUser(user_registered_event)])
+        Ok(vec![UserDomainEvent::RegisteredUser(user_registered_event)])
+    }
+
+    pub fn authenticate_user(
+        &self,
+        authenticate_user_command: &AuthenticateUserCommand,
+    )-> Result<Vec<UserDomainEvent>, UserDomainError> {
+        let user_id = UserId::new(authenticate_user_command.id);
+
+       let result = self.password_as_ref().verify_password(&authenticate_user_command.hashed_password);
+
+        return match result {
+            Ok(_) => {
+                let event = UserSuccessfullyAuthenticated{
+                    id: *user_id.value(),
+                    occurred_at: Utc::now()
+                };
+               Ok(vec![UserDomainEvent::UserAuthenticated(event)])
+            },
+            Err(UserDomainError::IncorrectPassword) => {
+                let event = UserAuthenticationFailed{
+                    id: *user_id.value(),
+                    occurred_at: Utc::now()
+                };
+                Ok(vec![UserDomainEvent::UserAuthenticationFailed(event)])
+            },
+            Err(error) => {
+                return Err(error);
+            }
+        }
     }
 
     // private
     fn apply_user_registered_event(&mut self, user_registered_event: UserRegisteredDomainEvent) {
         self.is_registered = true;
-        self.email = Some(
+        self.email =
             UserEmail::new(user_registered_event.email.as_str())
-                .unwrap_or_else(|result| panic!("{}", result)),
-        );
+                .unwrap_or_else(|result| panic!("{}", result))
+        ;
 
-        self.password = Some(UserPassword::from_storage(
+        self.password = UserPassword::from_storage(
             user_registered_event.password_hash,
             user_registered_event.salt,
-        ));
+        );
     }
 }
 
 impl Default for User {
     fn default() -> Self {
-        User::new()
+        User::new(
+            UserId::default(),
+            UserEmail::new("init_user@gmail.com").unwrap(),
+            UserPassword::new("defaultPassword").unwrap()
+        )
     }
 }
 
 #[async_trait]
 impl EventSourcedAggregate for User {
-    type Event = UserEvent;
+    type Event = UserDomainEvent;
     type Error = UserDomainError;
 
     fn aggregate_type() -> String {
@@ -96,57 +131,61 @@ impl EventSourcedAggregate for User {
 
     fn apply(&mut self, event: Self::Event) {
         match event {
-            UserEvent::RegisteredUser(event) => {
+            UserDomainEvent::RegisteredUser(event) => {
                 self.apply_user_registered_event(event);
             }
+            _ => {}
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use actix_web::body::MessageBody;
     use super::*;
     use uuid::Uuid;
 
     #[test]
     fn new_user_init() {
-        let user = User::new();
-        assert_eq!(user.id(), None);
+        let id = UserId::default();
+        let email = UserEmail::new("francesc.travesa@mymail.com").unwrap();
+        let password_hash = "password_hash".to_string();
+        let user_password = UserPassword::new(&password_hash).unwrap();
+        let user = User::new(id, email.clone(), user_password.clone());
+        assert_eq!(user.id(), id);
         assert_eq!(false, user.is_registered());
-        assert_eq!(&None, user.email_as_ref());
-        assert_eq!(&None, user.password_as_ref());
-
-        let user2 = User::default();
-        assert_eq!(user2.id(), None);
-        assert_eq!(false, user2.is_registered());
-        assert_eq!(&None, user2.email_as_ref());
-        assert_eq!(&None, user2.password_as_ref());
+        assert_eq!(&email, user.email_as_ref());
+        assert_eq!(&user_password, user.password_as_ref());
     }
 
     #[test]
     fn apply_register_event() {
-        let mut user = User::new();
+        let id = UserId::default();
         let email = UserEmail::new("francesc.travesa@mymail.com").unwrap();
         let password_hash = "password_hash".to_string();
+        let user_password = UserPassword::new(&password_hash).unwrap();
         let salt = "salt".to_string();
 
-        let register_domain_event = UserEvent::RegisteredUser(UserRegisteredDomainEvent {
-            id: Default::default(),
+        let register_domain_event = UserDomainEvent::RegisteredUser(UserRegisteredDomainEvent {
+            id: *id.value(),
             email: email.value(),
             password_hash: password_hash.clone(),
             salt: salt.clone(),
+            occurred_at: Utc::now()
         });
+
+        let mut user = User::new(id, email.clone(), user_password);
 
         user.apply(register_domain_event);
 
-        assert_eq!(user.id(), None);
+        assert_eq!(user.id(), id);
         assert_eq!(true, user.is_registered());
-        assert_eq!(&Some(email.clone()), user.email_as_ref());
+        assert_eq!(&email, user.email_as_ref());
         assert_eq!(
             password_hash,
-            user.password_as_ref().as_ref().unwrap().hash_string
+            user.password_as_ref().hash_string
         );
-        assert_eq!(salt, user.password_as_ref().as_ref().unwrap().salt);
+        assert_eq!(salt, user.password_as_ref().salt);
     }
 
     #[test]
@@ -155,6 +194,7 @@ mod tests {
         let email = "francesc.travesa@mymail.com".to_string();
 
         let command = RegisterUserCommand::new(id, email.clone(), "mySecretPassword".to_string());
+        // because I am not saving commands, but if I were, the above password should be already hashed.
 
         let user = User::default();
         let result = user.register_user(&command);
@@ -163,12 +203,13 @@ mod tests {
         let event = events.get(0).unwrap();
 
         match event {
-            UserEvent::RegisteredUser(user_registered_event) => {
+            UserDomainEvent::RegisteredUser(user_registered_event) => {
                 assert_eq!(user_registered_event.id, id);
                 assert_eq!(user_registered_event.email, email);
                 assert_eq!(user_registered_event.password_hash.is_empty(), false);
                 assert_eq!(user_registered_event.salt.is_empty(), false);
-            }
+            },
+            _=>{}
         }
     }
 
@@ -176,11 +217,12 @@ mod tests {
     fn test_register_user_idempotency() {
         let id = Uuid::new_v4();
         let email = "francesc.travesa@mymail.com".to_string();
-        let previous = UserEvent::RegisteredUser(UserRegisteredDomainEvent {
+        let previous = UserDomainEvent::RegisteredUser(UserRegisteredDomainEvent {
             id: id.clone(),
             email: email.clone(),
             password_hash: "".to_string(),
             salt: "".to_string(),
+            occurred_at: Utc::now()
         });
 
         let mut user = User::default();

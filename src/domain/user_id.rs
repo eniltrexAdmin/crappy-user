@@ -22,6 +22,12 @@ impl UserId {
     }
 }
 
+impl Default for UserId {
+    fn default() -> Self {
+        UserId::new(Uuid::new_v4())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

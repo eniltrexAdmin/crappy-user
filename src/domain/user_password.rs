@@ -1,6 +1,6 @@
 use crate::domain::UserDomainError;
 use argon2::Argon2;
-use password_hash::{PasswordHash, SaltString};
+use password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString};
 use rand::thread_rng;
 use serde::{Deserialize, Serialize};
 
@@ -12,7 +12,7 @@ pub struct UserPassword {
 impl UserPassword {
     pub fn new(value: &str) -> Result<Self, UserDomainError> {
         let salt_value = SaltString::generate(thread_rng());
-        let hash = PasswordHash::generate(Argon2::default(), value, salt_value.as_str())
+        let hash = PasswordHash::generate(Self::get_encryption_algorithm(), value, salt_value.as_str())
             .map_err(|error| UserDomainError::CouldNotGeneratePassword(error.to_string()))?;
 
         Ok(UserPassword {
@@ -21,11 +21,28 @@ impl UserPassword {
         })
     }
 
+    pub fn get_encryption_algorithm() -> impl PasswordHasher + PasswordVerifier{
+        Argon2::default()
+    }
+
+    pub fn verify_password(&self, password_attempt: &str) -> Result<(), UserDomainError> {
+        let alg = &UserPassword::get_encryption_algorithm();
+        let alg: Vec<&dyn PasswordVerifier> = vec![alg];
+        let password_hash = PasswordHash::new(&self.hash_string).unwrap();
+        password_hash.verify_password(&alg, password_attempt)
+            .map_err(|_| UserDomainError::IncorrectPassword)
+    }
+
     pub fn from_storage(hash_string: String, salt: String) -> Self {
         UserPassword { hash_string, salt }
     }
 
-    pub fn validate_password(password_attempt: &str) -> Result<(),>
+    pub fn clone(&self) -> Self {
+        Self{
+            hash_string: self.hash_string.to_string(),
+            salt: self.salt.to_string()
+        }
+    }
 }
 
 #[cfg(test)]
@@ -39,6 +56,14 @@ mod tests {
         let password = "secret_password";
         let user_password = UserPassword::new(password);
         assert_ok!(user_password);
+    }
+
+    #[test]
+    fn clone() {
+        let password = "secret_password";
+        let user_password = UserPassword::new(password).unwrap();
+        let cloned_password = user_password.clone();
+        assert_eq!(user_password, cloned_password);
     }
 
     #[test]
@@ -59,23 +84,17 @@ mod tests {
     fn validate_password() {
         let password = "secret_password";
         let user_password = UserPassword::new(password).unwrap();
-
         let password_attempt = "secret_password";
-        let password_hash = PasswordHash::new(&user_password.hash_string).unwrap();
 
-        let alg: &[&dyn PasswordVerifier] = &[&Argon2::default()];
-        assert_ok!(password_hash.verify_password(alg, password_attempt));
+        assert_ok!(user_password.verify_password(password_attempt));
     }
 
     #[test]
     fn invalid_password() {
         let password = "secret_password";
         let user_password = UserPassword::new(password).unwrap();
-
         let password_attempt = "bad_password";
-        let password_hash = PasswordHash::new(&user_password.hash_string).unwrap();
 
-        let alg: &[&dyn PasswordVerifier] = &[&Argon2::default()];
-        assert_err!(password_hash.verify_password(alg, password_attempt));
+        assert_err!(user_password.verify_password(password_attempt));
     }
 }

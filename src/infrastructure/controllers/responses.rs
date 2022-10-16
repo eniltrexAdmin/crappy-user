@@ -15,9 +15,8 @@ impl ResponseError for UserDomainError {
             UserDomainError::CouldNotGeneratePassword(_string) => StatusCode::BAD_REQUEST,
             UserDomainError::ProblemRetrievingPassword(_string) => StatusCode::BAD_REQUEST,
             UserDomainError::UserAlreadyRegistered(_string) => StatusCode::BAD_REQUEST,
-            UserDomainError::CommandNotYetImplemented(_string) => StatusCode::INTERNAL_SERVER_ERROR,
-            UserDomainError::CouldNotLoadUserEvents(_string) => StatusCode::INTERNAL_SERVER_ERROR,
-            UserDomainError::CouldNotSaveUserEvents(_string) => StatusCode::INTERNAL_SERVER_ERROR,
+            UserDomainError::IncorrectPassword => StatusCode::BAD_REQUEST,
+            _ => StatusCode::INTERNAL_SERVER_ERROR
         };
     }
 

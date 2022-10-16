@@ -1,8 +1,8 @@
-use crate::domain::{EventStoreInterface, LogInCommand, User, UserEmail, UserEventStoreRepository, UserId, UserViewRepositoryError, UserViewRepositoryInterface};
+use crate::domain::{EventStoreInterface, User, UserEventStoreRepository, UserViewRepositoryError, UserViewRepositoryInterface};
 
 #[tracing::instrument(
 name = "Authenticate application",
-skip(password, view_repository, user_event_store_repository)
+skip(password_attempt, view_repository, user_event_store_repository)
 )]
 pub async fn authenticate_user(
     email: String,
@@ -23,14 +23,6 @@ pub async fn authenticate_user(
     // if not, write event B // if not write event B
     // 4. REturn JWT, write event A // return JWT.
 
-    let user_id = UserId::new(command.id);
-    let user_email = UserEmail::new(&email)?;
-    let credentials_view = view_repository.retrieve_user_credential_by_email(&user_email)?;
-
-
-    let password_hash = PasswordHash::new(&user_password.hash_string).unwrap();
-
-    let alg: &[&dyn PasswordVerifier] = &[&Argon2::default()];
 
 
     // I tihnk I know what to do!, I will make a sync call to a command handler
@@ -38,9 +30,8 @@ pub async fn authenticate_user(
     // maybe avoid this file "xxx_application" all together, but  I think I like it
     // lets seee where we go
 
-
-    user_event_store_repository
-        .save_events(user_id, events)
-        .await?;
+    // user_event_store_repository
+    //     .save_events(user_id, events)
+    //     .await?;
     Ok(())
 }

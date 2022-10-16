@@ -1,5 +1,5 @@
 use crate::domain::{EventEnvelope, User, UserCredentialsView, UserViewRepositoryError, UserViewRepositoryInterface};
-use crate::domain::UserEvent::RegisteredUser;
+use crate::domain::UserDomainEvent::RegisteredUser;
 
 #[tracing::instrument(
 name = "User Credentials aggregator",
@@ -14,6 +14,7 @@ pub async fn user_credentials_aggregator(
             let user_credentials_view: UserCredentialsView = user_registered_domain_event.into();
             view_repository.save_view(user_credentials_view).await?;
         }
+        _ => {}
     }
     Ok(())
 }

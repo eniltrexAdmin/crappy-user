@@ -1,8 +1,4 @@
-use crate::domain::{
-    EventEnvelope, EventSourcedAggregate, EventStoreError, EventStoreInterface, User,
-    UserDomainError, UserEvent, UserId,
-};
-use chrono::Utc;
+use crate::domain::{DomainEvent, EventEnvelope, EventSourcedAggregate, EventStoreError, EventStoreInterface, User, UserDomainError, UserDomainEvent, UserId};
 
 pub struct UserEventStoreRepository<ES>
 where
@@ -31,13 +27,13 @@ where
     pub async fn save_events(
         &self,
         user_id: UserId,
-        events: Vec<UserEvent>,
+        events: Vec<UserDomainEvent>,
     ) -> Result<(), UserDomainError> {
         let mut wrapped_events: Vec<EventEnvelope<User>> = Vec::new();
         for payload in events {
             wrapped_events.push(EventEnvelope {
                 aggregate_id: *user_id.value(),
-                occurred_at: Utc::now(),
+                occurred_at: payload.occurred_at(),
                 payload,
                 metadata: Default::default(),
             })

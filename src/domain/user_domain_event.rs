@@ -1,22 +1,55 @@
-use crate::domain::{DomainEvent, UserRegisteredDomainEvent};
+use chrono::{DateTime, Utc};
+use crate::domain::{DomainEvent, UserAuthenticationFailed, UserRegisteredDomainEvent, UserSuccessfullyAuthenticated};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub enum UserEvent {
+pub enum UserDomainEvent {
     RegisteredUser(UserRegisteredDomainEvent),
+    UserAuthenticated(UserSuccessfullyAuthenticated),
+    UserAuthenticationFailed(UserAuthenticationFailed)
 }
-// I would like to force all variants to have the trait DomainEvent, but I don't think
-// it's possible
-impl DomainEvent for UserEvent {
+
+// TODO this is ugly as fuck, how to do this better?
+impl DomainEvent for UserDomainEvent {
     fn event_type(&self) -> String {
-        return match self {
-            UserEvent::RegisteredUser(event) => event.event_type(),
-        };
+        return match self{
+            UserDomainEvent::RegisteredUser(event) => {
+                event.event_type()
+            },
+            UserDomainEvent::UserAuthenticationFailed(event) => {
+                event.event_type()
+            },
+            UserDomainEvent::UserAuthenticated(event) => {
+                event.event_type()
+            }
+        }
     }
 
     fn event_version(&self) -> String {
-        return match self {
-            UserEvent::RegisteredUser(event) => event.event_version(),
-        };
+        return match self{
+            UserDomainEvent::RegisteredUser(event) => {
+                event.event_version()
+            },
+            UserDomainEvent::UserAuthenticationFailed(event) => {
+                event.event_version()
+            },
+            UserDomainEvent::UserAuthenticated(event) => {
+                event.event_version()
+            }
+        }
+    }
+
+    fn occurred_at(&self) -> DateTime<Utc> {
+        return match self{
+            UserDomainEvent::RegisteredUser(event) => {
+                event.occurred_at()
+            },
+            UserDomainEvent::UserAuthenticationFailed(event) => {
+                event.occurred_at()
+            },
+            UserDomainEvent::UserAuthenticated(event) => {
+                event.occurred_at()
+            }
+        }
     }
 }
