@@ -10,6 +10,7 @@ mod event_store_interface;
 pub use event_store_interface::*;
 // AGGREGATE
 mod user;
+mod user_tests;
 pub use user::*;
 mod user_event_store_repository;
 pub use user_event_store_repository::*;
@@ -43,4 +44,6 @@ pub use user_view_repository::*;
 mod user_credentials_view;
 pub use user_credentials_view::*;
 mod user_read_model;
+
+
 pub use user_read_model::*;
