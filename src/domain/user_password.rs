@@ -49,7 +49,6 @@ impl UserPassword {
 mod tests {
     use super::*;
     use claim::{assert_err, assert_ok};
-    use password_hash::PasswordVerifier;
 
     #[test]
     fn generate_password() {
@@ -77,6 +76,10 @@ mod tests {
         assert_eq!(
             retrieved_user_password.hash_string,
             user_password.hash_string
+        );
+        assert_eq!(
+            retrieved_user_password.salt,
+            user_password.salt
         );
     }
 

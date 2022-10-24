@@ -44,7 +44,7 @@ impl User {
     // since I decided commands are first class class domain citizens, I am passing it here.
     pub fn register_user(
         &self,
-        register_user_command: &RegisterUserCommand,
+        register_user_command: RegisterUserCommand,
     ) -> Result<Vec<UserDomainEvent>, UserDomainError> {
         if self.is_registered {
             return Err(UserDomainError::UserAlreadyRegistered(
@@ -68,7 +68,7 @@ impl User {
 
     pub fn authenticate_user(
         &self,
-        authenticate_user_command: &AuthenticateUserCommand,
+        authenticate_user_command: AuthenticateUserCommand,
     )-> Result<Vec<UserDomainEvent>, UserDomainError> {
         let user_id = UserId::new(authenticate_user_command.id);
 
@@ -97,6 +97,7 @@ impl User {
 
     // private
     fn apply_user_registered_event(&mut self, user_registered_event: UserRegisteredDomainEvent) {
+        self.id = UserId::new(user_registered_event.id);
         self.is_registered = true;
         self.email =
             UserEmail::new(user_registered_event.email.as_str())
