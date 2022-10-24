@@ -4,9 +4,11 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
 use uuid::Uuid;
+use enum_dispatch::enum_dispatch;
 
 use crate::domain::EventSourcedAggregate;
 
+#[enum_dispatch]
 pub trait DomainEvent:
     Serialize + DeserializeOwned + Clone + PartialEq + fmt::Debug + Sync + Send
 {

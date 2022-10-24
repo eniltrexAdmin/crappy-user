@@ -2,6 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use uuid::Uuid;
+use crate::domain::DomainEvent;
 
 pub const USER_REGISTER_EVENT_TYPE: &str = "UserRegistered";
 pub const USER_REGISTER_EVENT_VERSION: &str = "1.0";
@@ -14,16 +15,16 @@ pub struct UserRegisteredDomainEvent {
     pub salt: String,
     pub occurred_at: DateTime<Utc>
 }
-impl UserRegisteredDomainEvent {
-    pub fn event_type(&self) -> String {
+impl DomainEvent for UserRegisteredDomainEvent {
+    fn event_type(&self) -> String {
         String::from(USER_REGISTER_EVENT_TYPE)
     }
 
-    pub fn event_version(&self) -> String {
+    fn event_version(&self) -> String {
         String::from(USER_REGISTER_EVENT_VERSION)
     }
 
-    pub fn occurred_at(&self) -> DateTime<Utc> {
+    fn occurred_at(&self) -> DateTime<Utc> {
         self.occurred_at
     }
 }
