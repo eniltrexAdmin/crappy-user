@@ -126,7 +126,7 @@ impl CrappyUserApp {
                 .route("/health_check", web::get().to(controllers::health_check))
                 .route("/register", web::post().to(controllers::register_user))
                 .route("/generate-view", web::post().to(controllers::generate_credentials_view))
-                // .route("/authenticate", web::get().to(controllers::get_match_requests))
+                .route("/authenticate", web::post().to(controllers::authenticate_user))
                 .app_data(db_pool.clone())
         })
         .listen(listener)?

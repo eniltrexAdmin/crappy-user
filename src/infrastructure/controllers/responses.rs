@@ -7,6 +7,11 @@ use serde::Serialize;
 #[derive(Debug, Serialize)]
 pub struct NoContentResponse {}
 
+#[derive(Debug, Serialize)]
+pub struct SuccessfulAuthenticationResponse {
+    pub(crate) token: String
+}
+
 impl ResponseError for UserDomainError {
     fn status_code(&self) -> StatusCode {
         return match &self {

@@ -6,3 +6,5 @@ mod register_user_controller;
 pub use register_user_controller::*;
 mod generate_credentials_view_controller;
 pub use generate_credentials_view_controller::*;
+mod authenticate_user_controller;
+pub use authenticate_user_controller::*;
