@@ -4,6 +4,18 @@ mod tests {
     use uuid::Uuid;
     use chrono::{SubsecRound, Utc};
 
+    fn default_user() -> User {
+        let id = Uuid::new_v4();
+        let email = "francesc.travesa@mymail.com";
+        let password_hash = "password_hash";
+        let user = simulate_fetch_user(
+            id,
+            email.clone(),
+            password_hash
+        );
+        return user;
+    }
+
     fn simulate_fetch_user(id: Uuid, email: &str, password_hash: &str) -> User {
         let user_id = UserId::new(id);
         let email = UserEmail::new(email).unwrap();
@@ -66,11 +78,37 @@ mod tests {
         );
     }
 
-    // #[test]
-    // fn apply_succestul_login_event(){}
-    //
-    // #[test]
-    // fn apply_unsuccesful_login_event(){}
+    #[test]
+    fn apply_successful_login_event(){
+        let mut user = default_user();
+        let pre_id = user.id().clone();
+        let pre_email = user.email_as_ref().clone();
+        let pre_password = user.password_as_ref().clone();
+        let successful_login_event = UserDomainEvent::UserAuthenticated(UserSuccessfullyAuthenticated{
+            id: *user.id().value(),
+            occurred_at: Utc::now()
+        });
+        user.apply(successful_login_event);
+        assert_eq!(pre_id, user.id());
+        assert_eq!(&pre_email, user.email_as_ref());
+        assert_eq!(&pre_password, user.password_as_ref());
+    }
+
+    #[test]
+    fn apply_unsuccessful_login_event(){
+        let mut user = default_user();
+        let pre_id = user.id().clone();
+        let pre_email = user.email_as_ref().clone();
+        let pre_password = user.password_as_ref().clone();
+        let successful_login_event = UserDomainEvent::UserAuthenticationFailed(UserAuthenticationFailed{
+            id: *user.id().value(),
+            occurred_at: Utc::now()
+        });
+        user.apply(successful_login_event);
+        assert_eq!(pre_id, user.id());
+        assert_eq!(&pre_email, user.email_as_ref());
+        assert_eq!(&pre_password, user.password_as_ref());
+    }
 
     #[test]
     fn register_user_command() {

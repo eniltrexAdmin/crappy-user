@@ -70,10 +70,11 @@ impl User {
         &self,
         authenticate_user_command: AuthenticateUserCommand,
     )-> Result<Vec<UserDomainEvent>, UserDomainError> {
+        if authenticate_user_command.id != *self.id.value() {
+            return Err(UserDomainError::CommandNotApplicableToThisUser);
+        }
         let user_id = UserId::new(authenticate_user_command.id);
-
-       let result = self.password_as_ref().verify_password(&authenticate_user_command.hashed_password);
-
+        let result = self.password_as_ref().verify_password(&authenticate_user_command.hashed_password);
         return match result {
             Ok(_) => {
                 let event = UserSuccessfullyAuthenticated{

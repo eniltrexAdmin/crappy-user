@@ -11,4 +11,4 @@ pub enum UserDomainEvent {
     UserAuthenticationFailed(UserAuthenticationFailed)
 }
 
-// TODO this is ugly as fuck, how to do this better? ->#[enum_dispatch(DomainEvent)]
+//#[enum_dispatch(DomainEvent)] sacing the day
