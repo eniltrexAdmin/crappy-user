@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 use async_trait::async_trait;
-use crate::domain::{EventStoreError, UserCredentialsView, UserEmail};
+use crate::domain::{EventStoreError, UserCredentialsView, UserDomainError, UserEmail};
 
 #[async_trait]
 pub trait UserViewRepositoryInterface {
@@ -33,5 +33,16 @@ impl Error for UserViewRepositoryError {}
 impl From<EventStoreError> for UserViewRepositoryError {
     fn from(err: EventStoreError ) -> Self {
         UserViewRepositoryError::DatabaseConnectionError(err.to_string())
+    }
+}
+
+
+impl From<UserViewRepositoryError> for UserDomainError {
+    fn from(err: UserViewRepositoryError) -> Self {
+        return match err {
+            UserViewRepositoryError::DatabaseConnectionError(message) => {
+                UserDomainError::CouldNotLoadUserView(message)
+            }
+        };
     }
 }

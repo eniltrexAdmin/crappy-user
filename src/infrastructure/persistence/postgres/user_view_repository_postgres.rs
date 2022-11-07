@@ -1,5 +1,5 @@
 use sqlx::{PgPool, Row};
-use crate::domain::{UserCredentialsView, UserDomainError, UserEmail, UserViewRepositoryError, UserViewRepositoryInterface};
+use crate::domain::{UserCredentialsView, UserEmail, UserViewRepositoryError, UserViewRepositoryInterface};
 use async_trait::async_trait;
 use sqlx::postgres::PgRow;
 
@@ -49,15 +49,5 @@ impl From<sqlx::Error> for UserViewRepositoryError {
             err.as_database_error().unwrap().to_string()
         );
         UserViewRepositoryError::DatabaseConnectionError(err.as_database_error().unwrap().to_string())
-    }
-}
-
-impl From<UserViewRepositoryError> for UserDomainError {
-    fn from(err: UserViewRepositoryError) -> Self {
-        return match err {
-            UserViewRepositoryError::DatabaseConnectionError(message) => {
-                UserDomainError::CouldNotLoadUserView(message)
-            }
-        };
     }
 }
