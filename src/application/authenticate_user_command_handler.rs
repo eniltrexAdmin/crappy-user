@@ -2,7 +2,7 @@ use crate::domain::{EventStoreInterface, AuthenticateUserCommand, User, UserDoma
 
 #[tracing::instrument(
 name = "Authenticate User Command Handler",
-skip(user_event_store_repository, command)
+skip(user_event_store_repository)
 )]
 pub async fn authenticate_user_command_handler(
     user_event_store_repository: &UserEventStoreRepository<impl EventStoreInterface<User>>,
