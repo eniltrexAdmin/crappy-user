@@ -21,6 +21,7 @@ impl ResponseError for UserDomainError {
             UserDomainError::ProblemRetrievingPassword(_string) => StatusCode::BAD_REQUEST,
             UserDomainError::UserAlreadyRegistered(_string) => StatusCode::BAD_REQUEST,
             UserDomainError::IncorrectPassword => StatusCode::BAD_REQUEST,
+            UserDomainError::UserNotFound => StatusCode::NOT_FOUND,
             _ => StatusCode::INTERNAL_SERVER_ERROR
         };
     }

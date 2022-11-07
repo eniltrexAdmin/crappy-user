@@ -14,7 +14,8 @@ pub enum UserDomainError {
     IncorrectPassword,
     CommandNotApplicableToThisUser,
     UnexpectedDomainEvent,
-    CouldNotLoadUserView(String)
+    CouldNotLoadUserView(String),
+    UserNotFound
 }
 impl std::error::Error for UserDomainError {}
 impl Display for UserDomainError {
@@ -46,6 +47,7 @@ impl Display for UserDomainError {
             UserDomainError::CouldNotLoadUserView(error) => {
                 write!(f, "Problem fetching user from Read Repository: {}", error)
             },
+            UserDomainError::UserNotFound => write!(f, "User not found."),
         }
     }
 }

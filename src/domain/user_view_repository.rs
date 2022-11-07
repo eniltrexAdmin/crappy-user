@@ -7,7 +7,7 @@ use crate::domain::{EventStoreError, UserCredentialsView, UserEmail};
 pub trait UserViewRepositoryInterface {
     async fn save_view(&self, user_credentials_view: UserCredentialsView) -> Result<(), UserViewRepositoryError>;
     // TODO change that for getting the generic read model.
-    async fn retrieve_user_credentials_view(&self, email: &UserEmail) -> Result<UserCredentialsView, UserViewRepositoryError>;
+    async fn retrieve_user_credentials_view(&self, email: &UserEmail) -> Result<Option<UserCredentialsView>, UserViewRepositoryError>;
     // async fn save(&self, match_request: MatchRequest) -> Result<(), MatchRequestDomainError>;
     // async fn search_by_criteria(&self, match_request_criteria: MatchRequestCriteria) -> Result<Vec<MatchRequest>, MatchRequestDomainError>;
 }

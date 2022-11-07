@@ -26,7 +26,13 @@ pub async fn crappy_authenticate_user(
     user_event_store_repository: &UserEventStoreRepository<impl EventStoreInterface<User>>
 ) -> Result<String, UserDomainError>  {
     let user_email = UserEmail::new(authenticate_user_request.email.as_str())?;
-    let view_user = view_repository.retrieve_user_credentials_view(&user_email).await?;
+    let user_found = view_repository.retrieve_user_credentials_view(&user_email)
+        .await?;
+
+    if user_found.is_none() {
+        return Err(UserDomainError::UserNotFound);
+    }
+    let view_user = user_found.unwrap();
 
     let authenticate_user_command = AuthenticateUserCommand{
         id: view_user.uuid,
