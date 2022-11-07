@@ -18,7 +18,7 @@ pub struct AuthenticateUserApplicationRequest {
 
 #[tracing::instrument(
 name = "Authenticate application",
-skip(view_repository, user_event_store_repository)
+skip(view_repository, user_event_store_repository, authenticate_user_request)
 )]
 pub async fn crappy_authenticate_user(
     authenticate_user_request: AuthenticateUserApplicationRequest,
@@ -37,7 +37,7 @@ pub async fn crappy_authenticate_user(
     let authenticate_user_command = AuthenticateUserCommand{
         id: view_user.uuid,
         email: view_user.email.clone(),
-        hashed_password:  authenticate_user_request.password_attempt
+        password_attempt:  authenticate_user_request.password_attempt
     };
 
     let authenticate_user_result = authenticate_user_command_handler(
