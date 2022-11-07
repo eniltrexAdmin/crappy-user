@@ -4,3 +4,5 @@ mod user_credentials_aggregator;
 pub use user_credentials_aggregator::*;
 mod authenticate_user_command_handler;
 pub use authenticate_user_command_handler::*;
+mod authenticate_user_application;
+pub use authenticate_user_application::*;

@@ -1,5 +1,5 @@
 use sqlx::PgPool;
-use crate::domain::{UserCredentialsView, UserViewRepositoryError, UserViewRepositoryInterface};
+use crate::domain::{UserCredentialsView, UserDomainError, UserEmail, UserViewRepositoryError, UserViewRepositoryInterface};
 use async_trait::async_trait;
 
 pub struct UserViewPostgresRepository<'a>{
@@ -22,6 +22,10 @@ impl UserViewRepositoryInterface for UserViewPostgresRepository<'_> {
         ;
         Ok(())
     }
+
+    async fn retrieve_user_credentials_view(&self, email: &UserEmail) -> Result<UserCredentialsView, UserViewRepositoryError> {
+        todo!()
+    }
 }
 
 impl From<sqlx::Error> for UserViewRepositoryError {
@@ -31,5 +35,15 @@ impl From<sqlx::Error> for UserViewRepositoryError {
             err.as_database_error().unwrap().to_string()
         );
         UserViewRepositoryError::DatabaseConnectionError(err.as_database_error().unwrap().to_string())
+    }
+}
+
+impl From<UserViewRepositoryError> for UserDomainError {
+    fn from(err: UserViewRepositoryError) -> Self {
+        return match err {
+            UserViewRepositoryError::DatabaseConnectionError(message) => {
+                UserDomainError::CouldNotLoadUserView(message)
+            }
+        };
     }
 }

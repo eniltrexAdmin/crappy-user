@@ -13,7 +13,8 @@ pub enum UserDomainError {
     CouldNotSaveUserEvents(String),
     IncorrectPassword,
     CommandNotApplicableToThisUser,
-    UnexpectedDomainEvent
+    UnexpectedDomainEvent,
+    CouldNotLoadUserView(String)
 }
 impl std::error::Error for UserDomainError {}
 impl Display for UserDomainError {
@@ -42,6 +43,9 @@ impl Display for UserDomainError {
             UserDomainError::IncorrectPassword => write!(f, "Password did not match"),
             UserDomainError::CommandNotApplicableToThisUser => write!(f, "Command and User have mismatching IDs"),
             UserDomainError::UnexpectedDomainEvent => write!(f, "I am a teapot, the usage of the domain is wrong."),
+            UserDomainError::CouldNotLoadUserView(error) => {
+                write!(f, "Problem fetching user from Read Repository: {}", error)
+            },
         }
     }
 }

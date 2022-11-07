@@ -5,7 +5,8 @@ local-create-jwt-keys:
 	echo "Creating key pair. Public is public. Private cant be in git.";
 	openssl genrsa -out private.pem 2048
 	openssl rsa -in private.pem -outform PEM -pubout -out public.pem
-	mv private.pem src/config/
+	mv private.pem src/application/
+	mv public.pem src/config/
 
 local-install:
 	echo "Starting POSTGRESQL container and executing migrations against it. Command idempotent, but really, execute it once.";
