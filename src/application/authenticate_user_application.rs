@@ -1,8 +1,9 @@
 use jsonwebtoken::{Algorithm, encode, EncodingKey, Header};
+use secrecy::{SecretString};
 use uuid::Uuid;
 use crate::application::authenticate_user_command_handler;
 use crate::domain::{AuthenticateUserCommand, EventStoreInterface, User, UserDomainError, UserDomainEvent, UserEmail, UserEventStoreRepository, UserViewRepositoryInterface};
-use serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize, Serializer};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct CrappyUserClaims {
@@ -10,15 +11,24 @@ struct CrappyUserClaims {
     user_id: Uuid
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct AuthenticateUserApplicationRequest {
     email: String,
-    password_attempt: String,
+    password_attempt: SecretString,
+}
+
+impl Serialize for AuthenticateUserApplicationRequest {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+    {
+        serializer.serialize_str(&self.email)
+    }
 }
 
 #[tracing::instrument(
 name = "Authenticate application",
-skip(view_repository, user_event_store_repository, authenticate_user_request)
+skip(view_repository, user_event_store_repository)
 )]
 pub async fn crappy_authenticate_user(
     authenticate_user_request: AuthenticateUserApplicationRequest,

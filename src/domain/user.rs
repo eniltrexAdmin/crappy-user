@@ -1,6 +1,7 @@
 use crate::domain::*;
 use async_trait::async_trait;
 use chrono::Utc;
+use secrecy::ExposeSecret;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -76,7 +77,7 @@ impl User {
         let user_id = UserId::new(authenticate_user_command.id);
         let result = self
             .password_as_ref()
-            .verify_password(&authenticate_user_command.password_attempt);
+            .verify_password(&authenticate_user_command.password_attempt.expose_secret());
         return match result {
             Ok(_) => {
                 let event = UserSuccessfullyAuthenticated{
