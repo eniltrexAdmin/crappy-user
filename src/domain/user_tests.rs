@@ -3,6 +3,7 @@ mod tests {
     use crate::domain::*;
     use uuid::Uuid;
     use chrono::{SubsecRound, Utc};
+    use secrecy::SecretString;
 
     fn default_user() -> User {
         let id = Uuid::new_v4();
@@ -163,7 +164,7 @@ mod tests {
         let command = AuthenticateUserCommand::new(
             id,
             email.clone(),
-            password_hash.clone()
+            SecretString::from(password_hash)
         );
 
         let result = user.authenticate_user(command);
@@ -192,7 +193,7 @@ mod tests {
         let command = AuthenticateUserCommand::new(
             id,
             email.clone(),
-            "wrong_password".to_string()
+            SecretString::from("wrong_password".to_string())
         );
         let result = user.authenticate_user(command);
         let events = result.unwrap();
@@ -223,7 +224,7 @@ mod tests {
         let command = AuthenticateUserCommand::new(
             Uuid::new_v4(),
             email.clone(),
-            password_hash.clone()
+            SecretString::from(password_hash)
         );
         let result = user.authenticate_user(command);
         assert_eq!(result, Err(UserDomainError::CommandNotApplicableToThisUser))
