@@ -2,7 +2,7 @@ use jsonwebtoken::{Algorithm, encode, EncodingKey, Header};
 use secrecy::{SecretString};
 use uuid::Uuid;
 use crate::application::authenticate_user_command_handler;
-use crate::domain::{AuthenticateUserCommand, EventStoreInterface, User, UserDomainError, UserDomainEvent, UserEmail, UserEventStoreRepository, UserViewRepositoryInterface};
+use crate::domain::{AuthenticateUserCommand, EventStoreInterface, User, UserDomainError, UserDomainEvent, UserEmail, UserViewRepositoryInterface, UserEventStoreRepository};
 use serde::{Serialize, Deserialize, Serializer};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -51,7 +51,7 @@ pub async fn crappy_authenticate_user(
     };
 
     let authenticate_user_result = authenticate_user_command_handler(
-        &user_event_store_repository,
+        user_event_store_repository,
         authenticate_user_command
     ).await?;
 

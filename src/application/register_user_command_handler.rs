@@ -1,14 +1,11 @@
-use crate::domain::{
-    EventStoreInterface, RegisterUserCommand, User, UserDomainError, UserEventStoreRepository,
-    UserId,
-};
+use crate::domain::{RegisterUserCommand, UserDomainError, UserId, UserRepository};
 
 #[tracing::instrument(
     name = "Register User Command Handler",
     skip(user_event_store_repository)
 )]
 pub async fn register_user_command_handler(
-    user_event_store_repository: &UserEventStoreRepository<impl EventStoreInterface<User>>,
+    user_event_store_repository: &impl UserRepository,
     command: RegisterUserCommand,
 ) -> Result<(), UserDomainError> {
     let user_id = UserId::new(command.id);

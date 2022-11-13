@@ -37,6 +37,7 @@ chrono = { version="0.4.15", features = ["serde"]  }
 futures = "0.3.23"
 enum_dispatch = "0.3.8"
 jsonwebtoken = "8"
+mockall = "0.11.3"
 
 [dependencies.sqlx]
 version = "0.6.0"
@@ -54,3 +55,5 @@ features = [
 
 [dev-dependencies]
 claim = "0.5"
+tokio = { version = "1", features = ["macros"] } #for tokyo::test for async functions
+

@@ -1,11 +1,11 @@
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use crate::domain::*;
     use uuid::Uuid;
     use chrono::{SubsecRound, Utc};
     use secrecy::SecretString;
 
-    fn default_user() -> User {
+    pub fn default_user() -> User {
         let id = Uuid::new_v4();
         let email = "francesc.travesa@mymail.com";
         let password_hash = "password_hash";
@@ -17,7 +17,7 @@ mod tests {
         return user;
     }
 
-    fn simulate_fetch_user(id: Uuid, email: &str, password_hash: &str) -> User {
+    pub fn simulate_fetch_user(id: Uuid, email: &str, password_hash: &str) -> User {
         let user_id = UserId::new(id);
         let email = UserEmail::new(email).unwrap();
         let password_hash = password_hash.to_string();
@@ -176,8 +176,8 @@ mod tests {
             UserDomainEvent::UserAuthenticated(user_authenticated_event) => {
                 assert_eq!(user_authenticated_event.id, id);
                 assert_eq!(
-                    Utc::now().round_subsecs(2),
-                    user_authenticated_event.occurred_at().clone().round_subsecs(2)
+                    Utc::now().round_subsecs(3),
+                    user_authenticated_event.occurred_at().clone().round_subsecs(3)
                 );
             },
             wrong_domain_event=> {

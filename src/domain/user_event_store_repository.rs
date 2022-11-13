@@ -1,4 +1,18 @@
 use crate::domain::{DomainEvent, EventEnvelope, EventSourcedAggregate, EventStoreError, EventStoreInterface, User, UserDomainError, UserDomainEvent, UserId};
+use async_trait::async_trait;
+use mockall::*;
+// that could be even more generic, but I dont want to think about
+// a generic UUID to "load", that had to be generic too.
+#[automock]
+#[async_trait]
+pub trait UserRepository {
+     async fn load(&self, user_id: UserId) -> Result<User, UserDomainError>;
+     async fn save_events(
+        &self,
+        user_id: UserId,
+        events: Vec<UserDomainEvent>,
+    ) -> Result<(), UserDomainError>;
+}
 
 pub struct UserEventStoreRepository<ES>
 where
@@ -7,11 +21,12 @@ where
     pub store: ES,
 }
 
-impl<ES> UserEventStoreRepository<ES>
+#[async_trait]
+impl<ES> UserRepository for UserEventStoreRepository<ES>
 where
     ES: EventStoreInterface<User>,
 {
-    pub async fn load(&self, user_id: UserId) -> Result<User, UserDomainError> {
+    async fn load(&self, user_id: UserId) -> Result<User, UserDomainError> {
         let events_to_apply = self.store.load_events(user_id.value()).await.map_err(
             |event_store_error: EventStoreError| {
                 UserDomainError::CouldNotLoadUserEvents(event_store_error.to_string())
@@ -24,7 +39,7 @@ where
         Ok(user)
     }
 
-    pub async fn save_events(
+    async fn save_events(
         &self,
         user_id: UserId,
         events: Vec<UserDomainEvent>,

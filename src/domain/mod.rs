@@ -10,7 +10,7 @@ mod event_store_interface;
 pub use event_store_interface::*;
 // AGGREGATE
 mod user;
-mod user_tests;
+pub(crate) mod user_tests;
 pub use user::*;
 mod user_event_store_repository;
 pub use user_event_store_repository::*;

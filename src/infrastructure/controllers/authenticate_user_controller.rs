@@ -6,7 +6,7 @@ use actix_web::{web, HttpResponse};
 use sqlx::PgPool;
 use crate::user_view_repository_postgres::UserViewPostgresRepository;
 
-#[tracing::instrument(name = "Post to Authenticate User.", skip(request, pool))]
+#[tracing::instrument(name = "Post to Authenticate User.", skip(pool))]
 pub async fn authenticate_user(
     request: web::Json<AuthenticateUserApplicationRequest>,
     pool: web::Data<PgPool>,
@@ -27,3 +27,5 @@ pub async fn authenticate_user(
     ).await?;
     Ok(HttpResponse::Accepted().json(SuccessfulAuthenticationResponse {token: result}))
 }
+
+
