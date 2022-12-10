@@ -34,7 +34,7 @@ And check teh aggreagator. start implementing the real complete Read Model
 
 ## Todo dynamic
 
-- [ ] Play the app, see if it works
+- [X] Play the app, see if it works IT DOES IT DOES IT DOES!!!!!
 - [ ] Start implementing the real read model, the aggreagtor, and use that.
 - [ ] The above should be enough for me to try to deploy to some prod. Create pipeline and so on.
 - [ ] The rest of development with the events I imagined I needed. (see the read model to know more about what

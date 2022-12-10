@@ -129,7 +129,7 @@ impl CrappyUserApp {
                 .route("/generate-view", web::post().to(controllers::generate_credentials_view))
                 .route("/authenticate", web::post().to(controllers::authenticate_user))
                 .app_data(db_pool.clone())
-                .app_data(web::JsonConfig::default().error_handler(|err, req| {
+                .app_data(web::JsonConfig::default().error_handler(|err, _req| {
                     // custom error handler to display pretty jsons
                     let custom_error: CrappyActixError = err.into();
                     custom_error.into()
