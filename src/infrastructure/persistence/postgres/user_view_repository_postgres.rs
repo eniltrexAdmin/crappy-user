@@ -26,8 +26,8 @@ impl UserViewRepositoryInterface for UserViewPostgresRepository<'_> {
     }
 
     async fn retrieve_user_credentials_view(&self, email: &UserEmail) -> Result<Option<UserCredentialsView>, UserViewRepositoryError> {
-        let view = sqlx::query("SELECT * FROM user_credentials_view where
-                  user_email = ?")
+        let view = sqlx::query("SELECT FROM user_credentials_view where
+                  user_email = $1")
             .bind(email.value())
             .fetch_optional(self.pool)
             .await?
@@ -45,7 +45,7 @@ impl UserViewRepositoryInterface for UserViewPostgresRepository<'_> {
 impl From<sqlx::Error> for UserViewRepositoryError {
     fn from(err: sqlx::Error) -> Self {
         tracing::error!(
-            "SQLX error: {:?}",
+            "SQLX error for UserViewRepositoryError: {:?}",
             err.as_database_error().unwrap().to_string()
         );
         UserViewRepositoryError::DatabaseConnectionError(err.as_database_error().unwrap().to_string())

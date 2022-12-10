@@ -40,7 +40,7 @@ pub async fn crappy_authenticate_user(
         .await?;
 
     if user_found.is_none() {
-        return Err(UserDomainError::UserNotFound);
+        return Err(UserDomainError::UserNotFound("Probably the View has not been generated yet.".to_string()));
     }
     let view_user = user_found.unwrap();
 

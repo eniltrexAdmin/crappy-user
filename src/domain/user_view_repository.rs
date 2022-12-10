@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 use async_trait::async_trait;
+use serde::Serialize;
 use crate::domain::{EventStoreError, UserCredentialsView, UserDomainError, UserEmail};
 
 #[async_trait]
@@ -14,7 +15,7 @@ pub trait UserViewRepositoryInterface {
 }
 
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub enum UserViewRepositoryError {
     DatabaseConnectionError(String),
 }
