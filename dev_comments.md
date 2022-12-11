@@ -35,6 +35,7 @@ And check teh aggreagator. start implementing the real complete Read Model
 ## Todo dynamic
 
 - [X] Play the app, see if it works IT DOES IT DOES IT DOES!!!!!
+- [ ] Put "apply" on the functions of user and review the tests, many claims on "apply" functions can be done on the "main" function where the event is being generated.
 - [ ] Start implementing the real read model, the aggreagtor, and use that.
 - [ ] Think on different ways to execute the aggregators, Carlos Buenosvinos domain listener???
 - [ ] The above should be enough for me to try to deploy to some prod. Create pipeline and so on.
