@@ -10,6 +10,7 @@ pub struct User {
     email: UserEmail,
     password: UserPassword,
     is_registered: bool,
+    recorded_events: Vec<UserDomainEvent>
 }
 
 impl User {
@@ -19,6 +20,7 @@ impl User {
             email,
             password,
             is_registered: false,
+            recorded_events: vec![]
         }
     }
 
@@ -44,9 +46,9 @@ impl User {
     // all domain actions should assume an "init" state. Therefore all have &self.
     // since I decided commands are first class class domain citizens, I am passing it here.
     pub fn register_user(
-        &self,
+        &mut self,
         register_user_command: RegisterUserCommand,
-    ) -> Result<Vec<UserDomainEvent>, UserDomainError> {
+    ) -> Result<(), UserDomainError> {
         if self.is_registered {
             return Err(UserDomainError::UserAlreadyRegistered(
                 self.email.value(),
@@ -64,7 +66,9 @@ impl User {
             salt: user_password.salt,
             occurred_at: Utc::now()
         };
-        Ok(vec![UserDomainEvent::RegisteredUser(user_registered_event)])
+        self.recorded_events.push(UserDomainEvent::RegisteredUser(user_registered_event.clone()));
+        self.apply(UserDomainEvent::RegisteredUser(user_registered_event.clone()));
+        Ok(())
     }
 
     pub fn authenticate_user(
@@ -129,6 +133,11 @@ impl Default for User {
 impl EventSourcedAggregate for User {
     type Event = UserDomainEvent;
     type Error = UserDomainError;
+
+    fn recorded_events(&self) -> Vec<Self::Event>
+    {
+        self.recorded_events.to_owned()
+    }
 
     fn aggregate_type() -> String {
         "user".to_string()

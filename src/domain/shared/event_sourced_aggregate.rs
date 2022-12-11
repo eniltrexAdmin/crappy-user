@@ -7,6 +7,7 @@ use async_trait::async_trait;
 pub trait EventSourcedAggregate: Default + Sync + Send {
     type Event: DomainEvent;
     type Error: std::error::Error;
+    fn recorded_events(&self) -> Vec<Self::Event>;
     fn aggregate_type() -> String;
     fn apply(&mut self, event: Self::Event);
 }

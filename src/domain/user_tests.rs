@@ -115,12 +115,12 @@ pub(crate) mod tests {
     fn register_user_command() {
         let id = Uuid::new_v4();
         let email = "francesc.travesa@mymail.com".to_string();
-        let command = RegisterUserCommand::new(id, email.clone(), "mySecretPassword".to_string());
+        let command = RegisterUserCommand::new(id, email.clone(), "my_password".to_string());
         // because I am not saving commands, but if I were, the above password should be already hashed.
 
-        let user = User::default();
-        let result = user.register_user(command);
-        let events = result.unwrap();
+        let mut user = User::default();
+        user.register_user(command).unwrap();
+        let events = user.recorded_events();
         assert_eq!(1, events.len());
         let event = events.get(0).unwrap();
 
@@ -137,6 +137,10 @@ pub(crate) mod tests {
             },
             _=>{}
         }
+
+        assert_eq!(user.id().value(), &id);
+        assert_eq!(true, user.is_registered());
+        assert_eq!(email, user.email_as_ref().value());
     }
 
     #[test]
@@ -144,7 +148,7 @@ pub(crate) mod tests {
         let id = Uuid::new_v4();
         let email = "francesc.travesa@mymail.com";
         let password_hash = "password_hash";
-        let user = simulate_fetch_user(
+        let mut user = simulate_fetch_user(
             id,
             email.clone(),
             password_hash
