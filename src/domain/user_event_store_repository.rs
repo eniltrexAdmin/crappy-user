@@ -1,9 +1,9 @@
 use crate::domain::{DomainEvent, EventEnvelope, EventSourcedAggregate, EventStoreError, EventStoreInterface, User, UserDomainError, UserDomainEvent, UserId};
 use async_trait::async_trait;
-use mockall::*;
+// use mockall::*;
 // that could be even more generic, but I dont want to think about
 // a generic UUID to "load", that had to be generic too.
-#[automock]
+// #[automock]
 #[async_trait]
 pub trait UserRepository {
      async fn load(&self, user_id: UserId) -> Result<User, UserDomainError>;
