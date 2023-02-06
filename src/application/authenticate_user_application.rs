@@ -25,7 +25,19 @@ impl Serialize for AuthenticateUserApplicationRequest {
         serializer.serialize_str(&self.email)
     }
 }
-
+// Hey did I see something weird here?
+// I wrote a lot on previous commits here, and today I realized what the main difference
+// between Garrofolo and me here: I emit domain events.
+// If I emit domain events, it's not a query, it's a command!, so I should not
+// use the read repository, but the write, and only the user event store reposirtory.
+// So here it's the "fishy" way, I still kind of like it to break the rules, once
+// I know which rules I am breaking.
+// That's why I am calling the command handler...and the event store, it is behaving
+// like a controller this whole 'application'
+// And the only reasong I hve the view repository, which the initial idea was to do the
+// actual match of credentials, is now to find the user beforehand
+// I might probably remove the whole 'application' or well, leave it as a testament(?)
+// like we can have "satellites' and that's how you plug them in in the system.
 #[tracing::instrument(
 name = "Authenticate application",
 skip(view_repository, user_event_store_repository)
