@@ -1,8 +1,8 @@
 use jsonwebtoken::{Algorithm, encode, EncodingKey, Header};
 use secrecy::{SecretString};
 use uuid::Uuid;
-use crate::application::authenticate_user_command_handler;
-use crate::domain::{AuthenticateUserCommand, EventStoreInterface, User, UserDomainError, UserDomainEvent, UserEmail, UserViewRepositoryInterface, UserEventStoreRepository};
+use crate::application::{authenticate_user_command_handler, AuthenticateUserCommand};
+use crate::domain::{EventStoreInterface, User, UserDomainError, UserDomainEvent, UserEmail, UserViewRepositoryInterface, UserEventStoreRepository};
 use serde::{Serialize, Deserialize, Serializer};
 
 #[derive(Debug, Serialize, Deserialize)]

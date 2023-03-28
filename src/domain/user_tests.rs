@@ -3,7 +3,6 @@ pub(crate) mod tests {
     use crate::domain::*;
     use uuid::Uuid;
     use chrono::{SubsecRound, Utc};
-    use secrecy::SecretString;
 
     pub fn default_user() -> User {
         let id = Uuid::new_v4();
@@ -112,22 +111,21 @@ pub(crate) mod tests {
     }
 
     #[test]
-    fn register_user_command() {
-        let id = Uuid::new_v4();
-        let email = "francesc.travesa@mymail.com".to_string();
-        let command = RegisterUserCommand::new(id, email.clone(), "my_password".to_string());
-        // because I am not saving commands, but if I were, the above password should be already hashed.
+    fn register_user() {
+        let id = UserId::new(Uuid::new_v4());
+        let email = UserEmail::new("francesc.travesa@mymail.com".to_string().as_ref()).unwrap();
+        let password = UserPassword::new( "my_password".to_string().as_ref()).unwrap();
 
         let mut user = User::default();
-        user.register_user(command).unwrap();
+        user.register_user(id, email.clone(), password).unwrap();
         let events = user.recorded_events();
         assert_eq!(1, events.len());
         let event = events.get(0).unwrap();
 
         match event {
             UserDomainEvent::RegisteredUser(user_registered_event) => {
-                assert_eq!(user_registered_event.id, id);
-                assert_eq!(user_registered_event.email, email);
+                assert_eq!(user_registered_event.id, *id.value());
+                assert_eq!(user_registered_event.email, email.value());
                 assert_eq!(user_registered_event.password_hash.is_empty(), false);
                 assert_eq!(user_registered_event.salt.is_empty(), false);
                 assert_eq!(
@@ -138,40 +136,33 @@ pub(crate) mod tests {
             _=>{}
         }
 
-        assert_eq!(user.id().value(), &id);
+        assert_eq!(user.id(), id);
         assert_eq!(true, user.is_registered());
-        assert_eq!(email, user.email_as_ref().value());
+        assert_eq!(email, *user.email_as_ref());
     }
 
     #[test]
     fn test_register_user_idempotency() {
-        let id = Uuid::new_v4();
-        let email = "francesc.travesa@mymail.com";
-        let password_hash = "password_hash";
+        let id = UserId::new(Uuid::new_v4());
+        let email = UserEmail::new("francesc.travesa@mymail.com".to_string().as_ref()).unwrap();
+        let password = UserPassword::new( "my_password".to_string().as_ref()).unwrap();
         let mut user = simulate_fetch_user(
-            id,
-            email.clone(),
-            password_hash
+            *id.value(),
+            email.clone().value().as_ref(),
+            password.hash_string.as_str()
         );
-        let command = RegisterUserCommand::new(id, email.clone().to_string(), "mySecretPassword".to_string());
-        let result = user.register_user(command);
-        assert_eq!(result, Err(UserDomainError::UserAlreadyRegistered(email.to_string())))
+        let result = user.register_user(id, email.clone(), password);
+        assert_eq!(result, Err(UserDomainError::UserAlreadyRegistered(email.value())))
     }
 
     #[test]
-    fn authenticate_user_command() {
+    fn authenticate_user() {
         let id = Uuid::new_v4();
         let email = "francesc.travesa@mymail.com".to_string();
         let password_hash = "password_hash".to_string();
         let user = simulate_fetch_user(id, &email, &password_hash);
 
-        let command = AuthenticateUserCommand::new(
-            id,
-            email.clone(),
-            SecretString::from(password_hash)
-        );
-
-        let result = user.authenticate_user(command);
+        let result = user.authenticate_user(&password_hash);
         let events = result.unwrap();
         assert_eq!(1, events.len());
         let event = events.get(0).unwrap();
@@ -194,12 +185,7 @@ pub(crate) mod tests {
             }
         }
         // Now failed.
-        let command = AuthenticateUserCommand::new(
-            id,
-            email.clone(),
-            SecretString::from("wrong_password".to_string())
-        );
-        let result = user.authenticate_user(command);
+        let result = user.authenticate_user("wrong_password".to_string().as_ref());
         let events = result.unwrap();
         assert_eq!(1, events.len());
         let event = events.get(0).unwrap();
@@ -216,21 +202,5 @@ pub(crate) mod tests {
                 );
             }
         }
-    }
-
-    #[test]
-    fn authenticate_user_command_on_appropriate_user() {
-        let id = Uuid::new_v4();
-        let email = "francesc.travesa@mymail.com".to_string();
-        let password_hash = "password_hash".to_string();
-        let user = simulate_fetch_user(id, &email, &password_hash);
-
-        let command = AuthenticateUserCommand::new(
-            Uuid::new_v4(),
-            email.clone(),
-            SecretString::from(password_hash)
-        );
-        let result = user.authenticate_user(command);
-        assert_eq!(result, Err(UserDomainError::CommandNotApplicableToThisUser))
     }
 }

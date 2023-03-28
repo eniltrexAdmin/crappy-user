@@ -1,4 +1,6 @@
-use crate::domain::{AuthenticateUserCommand, UserDomainError, UserId, UserDomainEvent, UserRepository};
+use secrecy::ExposeSecret;
+use crate::application::AuthenticateUserCommand;
+use crate::domain::{UserDomainError, UserId, UserDomainEvent, UserRepository};
 
 #[tracing::instrument(
 name = "Authenticate User Command Handler",
@@ -10,7 +12,8 @@ pub async fn authenticate_user_command_handler(
 ) -> Result<UserDomainEvent, UserDomainError> {
     let user_id = UserId::new(command.id);
     let user = user_event_store_repository.load(user_id).await?;
-    let events = user.authenticate_user(command)?;
+
+    let events = user.authenticate_user(&command.password_attempt.expose_secret())?;
     let authentication_result = events.first().unwrap().clone();
     user_event_store_repository
         .save_events(user_id, events)

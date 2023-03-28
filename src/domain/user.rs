@@ -1,7 +1,6 @@
 use crate::domain::*;
 use async_trait::async_trait;
 use chrono::Utc;
-use secrecy::ExposeSecret;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -47,17 +46,15 @@ impl User {
     // since I decided commands are first class class domain citizens, I am passing it here.
     pub fn register_user(
         &mut self,
-        register_user_command: RegisterUserCommand,
+        user_id: UserId,
+        user_email: UserEmail,
+        user_password: UserPassword,
     ) -> Result<(), UserDomainError> {
         if self.is_registered {
             return Err(UserDomainError::UserAlreadyRegistered(
                 self.email.value(),
             ));
         }
-
-        let user_id = UserId::new(register_user_command.id);
-        let user_email = UserEmail::new(register_user_command.email.as_str())?;
-        let user_password = UserPassword::new(register_user_command.password.as_str())?;
 
         let user_registered_event = UserRegisteredDomainEvent {
             id: *user_id.value(),
@@ -73,26 +70,22 @@ impl User {
 
     pub fn authenticate_user(
         &self,
-        authenticate_user_command: AuthenticateUserCommand,
+        password_attempt: &str,
     )-> Result<Vec<UserDomainEvent>, UserDomainError> {
-        if authenticate_user_command.id != *self.id.value() {
-            return Err(UserDomainError::CommandNotApplicableToThisUser);
-        }
-        let user_id = UserId::new(authenticate_user_command.id);
         let result = self
             .password_as_ref()
-            .verify_password(&authenticate_user_command.password_attempt.expose_secret());
+            .verify_password(password_attempt);
         return match result {
             Ok(_) => {
                 let event = UserSuccessfullyAuthenticated{
-                    id: *user_id.value(),
+                    id: *self.id.value(),
                     occurred_at: Utc::now()
                 };
                Ok(vec![UserDomainEvent::UserAuthenticated(event)])
             },
             Err(UserDomainError::IncorrectPassword) => {
                 let event = UserAuthenticationFailed{
-                    id: *user_id.value(),
+                    id: *self.id.value(),
                     occurred_at: Utc::now()
                 };
                 Ok(vec![UserDomainEvent::UserAuthenticationFailed(event)])

@@ -1,6 +1,6 @@
 use crate::actix::controllers::NoContentResponse;
-use crate::application::register_user_command_handler;
-use crate::domain::{RegisterUserCommand, UserDomainError, UserEventStoreRepository};
+use crate::application::{register_user_command_handler, RegisterUserCommand};
+use crate::domain::{UserDomainError, UserEventStoreRepository};
 use crate::event_store_postgres::EventStorePostgres;
 use actix_web::{web, HttpResponse};
 use sqlx::PgPool;

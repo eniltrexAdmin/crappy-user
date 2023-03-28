@@ -25,11 +25,6 @@ mod user_successfully_authenticated_event;
 pub use user_successfully_authenticated_event::*;
 mod user_authentication_failed_event;
 pub use user_authentication_failed_event::*;
-// COMMANDS
-mod register_user_command;
-pub use register_user_command::*;
-mod authenticate_user_command;
-pub use authenticate_user_command::*;
 // VALUE OBJECTS
 mod user_id;
 pub use user_id::*;
